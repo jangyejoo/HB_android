@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="age">
+        <item> 1990 </item>
+        <item> 1991 </item>
+        <item> 1992 </item>
+        <item> 1993 </item>
+        <item> 1994 </item>
+        <item> 1995 </item>
+        <item> 1996 </item>
+        <item> 1997 </item>
+        <item> 1998 </item>
+        <item> 1999 </item>
+        <item> 2000 </item>
+        <item> 2001 </item>
+        <item> 2002 </item>
+    </string-array>
+
+    <string-array name="height">
+        <item> 150미만 </item>
+        <item> 150~154 </item>
+        <item> 155~159 </item>
+        <item> 160~164 </item>
+        <item> 165~169 </item>
+        <item> 170~174 </item>
+        <item> 175~179 </item>
+        <item> 180~184 </item>
+        <item> 185~189 </item>
+        <item> 190이상 </item>
+    </string-array>
+
+    <string-array name="weight">
+        <item> 40미만 </item>
+        <item> 40~44 </item>
+        <item> 45~59 </item>
+        <item> 60~64 </item>
+        <item> 65~69 </item>
+        <item> 70~74 </item>
+        <item> 75~79 </item>
+        <item> 80~84 </item>
+        <item> 85~89 </item>
+        <item> 95~99 </item>
+        <item> 100이상 </item>
+    </string-array>
+
+
+
+</resources>

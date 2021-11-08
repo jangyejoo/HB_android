@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_img"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        tools:srcCompat="@tools:sample/avatars"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:padding="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/et_nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:ems="10"
+            android:hint="닉네임"
+            android:inputType="textPersonName"
+            android:minHeight="48dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <EditText
+            android:id="@+id/et_gym"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:ems="10"
+            android:hint="헬스장 정보"
+            android:inputType="textPersonName"
+            android:minHeight="48dp" />
+
+        <Button
+            android:id="@+id/btn_find"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="헬스장 찾기" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="20">
+
+        <TextView
+            android:id="@+id/tv_age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="나이" />
+
+        <Spinner
+            android:id="@+id/spinner_age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:dropDownWidth="200dp"
+            android:minHeight="48dp"
+            android:spinnerMode="dropdown" />
+
+        <RadioGroup
+            android:id="@+id/rg_sex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_male"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:text="남" />
+
+            <RadioButton
+                android:id="@+id/rb_female"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:text="여" />
+        </RadioGroup>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="20">
+
+        <TextView
+            android:id="@+id/tv_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="키(cm)" />
+
+        <Spinner
+            android:id="@+id/spinner_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:dropDownWidth="200dp"
+            android:minHeight="48dp"
+            android:spinnerMode="dropdown" />
+
+        <TextView
+            android:id="@+id/tv_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="몸무게(kg)" />
+
+        <Spinner
+            android:id="@+id/spinner_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:dropDownWidth="200dp"
+            android:minHeight="48dp"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="7">
+
+        <CheckBox
+            android:id="@+id/cb_mon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="월" />
+
+        <CheckBox
+            android:id="@+id/cb_tue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="화" />
+
+        <CheckBox
+            android:id="@+id/cb_wed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="수" />
+
+        <CheckBox
+            android:id="@+id/cb_thr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="목" />
+
+        <CheckBox
+            android:id="@+id/cb_fri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="금" />
+
+        <CheckBox
+            android:id="@+id/cb_sat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="토" />
+
+        <CheckBox
+            android:id="@+id/cb_sun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCheckboxClicked"
+            android:text="일" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="짧은 소개글"
+        android:inputType="textMultiLine"
+        android:lines="7"
+        android:scrollbars="vertical" />
+
+    <CheckBox
+        android:id="@+id/cb_open"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="프로필을 공개합니다" />
+
+    <Button
+        android:id="@+id/btn_finish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="완료" />
+
+
+</LinearLayout>
