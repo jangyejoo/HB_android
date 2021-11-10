@@ -60,20 +60,34 @@
 
     <TextView
         android:id="@+id/tv_rg_check"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="" />
 
-    <EditText
-        android:id="@+id/et_rg_mail"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="이메일을 입력하시오"
-        android:inputType="textPersonName"
-        android:minHeight="48dp" />
+        android:orientation="horizontal"
+        android:weightSum="10"
+        >
 
+        <EditText
+            android:id="@+id/et_rg_mail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:ems="10"
+            android:hint="이메일을 입력하시오"
+            android:inputType="textPersonName"
+            android:minHeight="48dp" />
+
+        <Button
+            android:id="@+id/btn_duplicate2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="중복확인" />
+    </LinearLayout>
     <Button
         android:id="@+id/btn_rg_register"
         android:layout_width="match_parent"

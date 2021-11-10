@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,15 +23,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class LoginActivity extends AppCompatActivity {
     private Button btn_login;
     private EditText mId, mPwd;
+    private TextView goSignup, findId;
     public static Context context;
     public String userID;
 
@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // 권한 요청
+        // 갤러리 접근 권한 요청
         int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int permission2 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
 
@@ -61,6 +61,8 @@ public class LoginActivity extends AppCompatActivity {
         mId = (EditText) findViewById(R.id.et_id);
         mPwd = findViewById(R.id.et_pwd);
         btn_login = findViewById(R.id.btn_login);
+        goSignup = (TextView) findViewById(R.id.tv_register);
+        findId = (TextView) findViewById(R.id.tv_find);
         context=this;
         //checkBox = findViewById(R.id.autoLogin);
 
@@ -93,6 +95,24 @@ public class LoginActivity extends AppCompatActivity {
                     //로그인 통신
                     LoginResponse();
                 }
+            }
+        });
+
+        goSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = null;
+                intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        findId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = null;
+                intent = new Intent(LoginActivity.this, FindActivity.class);
+                startActivity(intent);
             }
         });
     }

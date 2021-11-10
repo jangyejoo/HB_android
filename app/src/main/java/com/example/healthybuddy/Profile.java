@@ -15,10 +15,6 @@ import retrofit2.http.Part;
 import retrofit2.http.PartMap;
 
 public interface Profile {
-    /*
-    @POST("create_profile")
-    Call<ResponseBody> create(@Header("Authorization") String authorization, @Body ProfileDTO objJson);
-     */
     @Multipart
     @POST("create_profile")
     Call<ResponseBody> create(@Header("Authorization") String authorization, @Part MultipartBody.Part pImg, @PartMap HashMap<String, RequestBody> data);
