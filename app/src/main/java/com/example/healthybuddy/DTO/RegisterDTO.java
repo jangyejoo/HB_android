@@ -1,4 +1,4 @@
-package com.example.healthybuddy;
+package com.example.healthybuddy.DTO;
 
 import com.google.gson.annotations.SerializedName;
 

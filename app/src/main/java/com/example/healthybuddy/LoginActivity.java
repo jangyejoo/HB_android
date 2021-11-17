@@ -23,6 +23,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.healthybuddy.DTO.LoginRequest;
+import com.example.healthybuddy.DTO.LoginResponse;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -170,7 +173,7 @@ public class LoginActivity extends AppCompatActivity {
                         //}
 
                         Toast.makeText(LoginActivity.this, userID + "님 환영합니다.", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, MemberActivity.class);
                         intent.putExtra("userId", userID);
                         startActivity(intent);
                         LoginActivity.this.finish();

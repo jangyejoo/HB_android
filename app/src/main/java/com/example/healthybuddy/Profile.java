@@ -1,6 +1,10 @@
 package com.example.healthybuddy;
 
+import com.example.healthybuddy.DTO.IdDTO;
+import com.example.healthybuddy.DTO.ProfileDTO;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
@@ -23,4 +27,10 @@ public interface Profile {
     @POST("profile_image")
     Call<ResponseBody> image (@Header("Authorization") String authorization, @Part MultipartBody.Part pImg, @PartMap HashMap<String, RequestBody> data);
 
+    @Multipart
+    @POST("members")
+    Call<List<ProfileDTO>> members (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @POST("profilecheck")
+    Call<ResponseBody> profileCheck(@Header("Authorization") String authorization, @Body IdDTO objJon);
 }

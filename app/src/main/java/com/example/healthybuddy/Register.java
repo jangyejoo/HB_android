@@ -1,17 +1,13 @@
 package com.example.healthybuddy;
 
-import java.util.HashMap;
+import com.example.healthybuddy.DTO.EmailDTO;
+import com.example.healthybuddy.DTO.IdDTO;
+import com.example.healthybuddy.DTO.RegisterDTO;
 
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
-import retrofit2.http.PartMap;
-import retrofit2.http.Query;
 
 public interface Register {
     @POST("signup")

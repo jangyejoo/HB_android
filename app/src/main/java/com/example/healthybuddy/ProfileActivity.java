@@ -1,10 +1,7 @@
 package com.example.healthybuddy;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.telephony.RadioAccessSpecifier;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,22 +27,21 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+
+import com.example.healthybuddy.DTO.RegisterDTO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -55,7 +50,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Multipart;
 
 public class ProfileActivity  extends AppCompatActivity {
     private ImageView pImg;
@@ -71,6 +65,10 @@ public class ProfileActivity  extends AppCompatActivity {
     private int IMG_REQUEST=21;
     private Bitmap bitmap;
     private File destFile=null;
+
+    // Gym
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private String Gym;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +103,20 @@ public class ProfileActivity  extends AppCompatActivity {
         token = "Bearer " + getPreferenceString(pId);
         pNickname.setText(pId);
 
+        //Gym
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode()==RESULT_OK){
+                            Gym = result.getData().getStringExtra("Gym");
+                            Log.d("hap", "이야"+Gym+"asdf");
+                            pGym.setText(Gym);
+                        }
+                    }
+                }
+        );
 
         RetrofitClient retrofitClient = new RetrofitClient();
         Call<List<RegisterDTO>> member = retrofitClient.login.members(token);
@@ -142,16 +154,14 @@ public class ProfileActivity  extends AppCompatActivity {
             }
         });
 
-/*
-        btn_update.setOnClickListener(new View.OnClickListener() {
+        btn_find.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SendImage();
+                Intent intent = null;
+                intent = new Intent(ProfileActivity.this, GymActivity.class);
+                resultLauncher.launch(intent);
             }
         });
-
- */
-
 
         // age spinner
         String [] items_age = new String [50];
@@ -345,6 +355,8 @@ public class ProfileActivity  extends AppCompatActivity {
             public void onClick(View view) {
                 pRoutine = String.join("",items_routine);
 
+                Log.d("test",pGym.getText().toString());
+
                 // MAP
                 HashMap<String, RequestBody> map = new HashMap<>();
                 RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);
@@ -368,6 +380,8 @@ public class ProfileActivity  extends AppCompatActivity {
                 map.put("pDetail",detail);
                 map.put("pOpen",open);
 
+                Log.d("Test",destFile.getPath());
+                Log.d("Test",String.valueOf(destFile.length()/1024));
                 // pImg
                 RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
                 MultipartBody.Part Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
@@ -392,7 +406,7 @@ public class ProfileActivity  extends AppCompatActivity {
                     return;
                 }
                 if(pDetail.getText().toString().length()==0){
-                    Toast.makeText(ProfileActivity.this, "닉네임을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this, "상태 메시지를 입력하세요.", Toast.LENGTH_SHORT).show();
                     pDetail.requestFocus();
                     return;
                 }
@@ -414,7 +428,7 @@ public class ProfileActivity  extends AppCompatActivity {
 
                                 Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = null;
-                                intent = new Intent(ProfileActivity.this, MainActivity.class);
+                                intent = new Intent(ProfileActivity.this, MemberActivity.class);
                                 startActivity(intent);
                             }
                         } catch(Exception e){
@@ -574,7 +588,7 @@ public class ProfileActivity  extends AppCompatActivity {
 
     private Bitmap compressBitmap(Bitmap bitmap){
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,60, stream);
         byte[] byteArray = stream.toByteArray();
         Bitmap compressedBitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.length);
         return compressedBitmap;

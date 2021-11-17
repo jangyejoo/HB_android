@@ -1,4 +1,4 @@
-package com.example.healthybuddy;
+package com.example.healthybuddy.DTO;
 
 public class IdDTO {
     private String mId;
