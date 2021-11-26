@@ -52,6 +52,15 @@
             android:name=".MemberActivity"
             android:label="MemberActivity">
         </activity>
+        <activity
+            android:name=".ChatActivity"
+            android:label="ChatActivity">
+        </activity>
+        <activity
+            android:name=".MessageActivity"
+            android:label="MessageActivity"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
     </application>
 
 </manifest>

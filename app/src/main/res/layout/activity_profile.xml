@@ -19,7 +19,8 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:padding="10dp"/>
+        android:layout_marginTop="10dp"
+        android:background="@color/black"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -72,14 +73,14 @@
 
         <TextView
             android:id="@+id/tv_age"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="나이" />
+            android:text="나이(연생)"/>
 
         <Spinner
             android:id="@+id/spinner_age"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="8"
             android:dropDownWidth="200dp"
@@ -88,21 +89,21 @@
 
         <RadioGroup
             android:id="@+id/rg_sex"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="10"
             android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/rb_male"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:text="남" />
 
             <RadioButton
                 android:id="@+id/rb_female"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:text="여" />
@@ -118,14 +119,14 @@
 
         <TextView
             android:id="@+id/tv_height"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:text="키(cm)" />
 
         <Spinner
             android:id="@+id/spinner_height"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="8"
             android:dropDownWidth="200dp"
@@ -134,14 +135,14 @@
 
         <TextView
             android:id="@+id/tv_weight"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:text="몸무게(kg)" />
 
         <Spinner
             android:id="@+id/spinner_weight"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="8"
             android:dropDownWidth="200dp"

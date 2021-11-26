@@ -138,6 +138,7 @@ public class MemberActivity extends AppCompatActivity {
                             oItem.img = "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg();
                             oItem.Nickname = post.getpNickname();
                             oItem.Detail = post.getpDetail();
+                            oItem.id2 = post.getpId();
                             // 성별, 키, 몸무게, 나이, 루틴
                             // 여, 180cm, 59kg, 1999년, 월수금
 

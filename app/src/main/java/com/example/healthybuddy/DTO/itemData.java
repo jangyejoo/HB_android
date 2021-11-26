@@ -5,4 +5,5 @@ public class itemData {
     public String Nickname;
     public String Detail;
     public String Info;
+    public String id2;
 }

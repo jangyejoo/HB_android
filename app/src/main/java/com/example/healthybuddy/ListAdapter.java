@@ -1,13 +1,16 @@
 package com.example.healthybuddy;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.healthybuddy.DTO.itemData;
@@ -56,11 +59,22 @@ public class ListAdapter extends BaseAdapter {
         TextView nickname = (TextView) convertView.findViewById(R.id.tv_nick);
         TextView info = (TextView) convertView.findViewById(R.id.tv_info);
         TextView detail = (TextView) convertView.findViewById(R.id.tv_detail);
+        Button btn = (Button)convertView.findViewById(R.id.btn_dm);
 
         Glide.with(img.getContext()).load(data.get(position).img).into(img);
         nickname.setText(data.get(position).Nickname);
         info.setText(data.get(position).Info);
         detail.setText(data.get(position).Detail);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), ChatActivity.class);
+                intent.putExtra("id2",data.get(position).id2);
+                view.getContext().startActivity(intent);
+            }
+        });
+
+
         return convertView;
     }
 }
