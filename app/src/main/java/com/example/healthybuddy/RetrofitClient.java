@@ -16,4 +16,5 @@ public class RetrofitClient {
     Profile profile = retrofit.create(Profile.class);
     Chat chat = retrofit.create(Chat.class);
     Message message = retrofit.create(Message.class);
+    Mate mate = retrofit.create(Mate.class);
 }

@@ -59,6 +59,7 @@ public class ChatAdapter extends BaseAdapter {
 
         Glide.with(img.getContext()).load(data.get(position).pImg).into(img);
         nickname.setText(data.get(position).pNickname);
+        comment.setText("");
         layout.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {

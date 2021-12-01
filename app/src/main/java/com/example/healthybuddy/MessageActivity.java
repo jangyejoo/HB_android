@@ -2,28 +2,24 @@ package com.example.healthybuddy;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.healthybuddy.DTO.ChatDTO;
 import com.example.healthybuddy.DTO.MessageDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
-import com.example.healthybuddy.DTO.chatData;
 import com.example.healthybuddy.DTO.messageData;
 
+import java.io.IOException;
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +34,7 @@ import retrofit2.Response;
 public class MessageActivity extends AppCompatActivity {
     private RecyclerView c_RecyclerView = null;
     private String pId, token, cId, crId;
-    private Button btn;
+    private Button btn, btn_friend, btn_accept;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -183,6 +179,197 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        HashMap<String, RequestBody> map3 = new HashMap<>();
+        RequestBody mtId = RequestBody.create(MediaType.parse("text/plain"), cId);
+        map3.put("mId" , id);
+        map3.put("mtId" , mtId);
+        HashMap<String, RequestBody> map4 = new HashMap<>();
+        map4.put("mId" , mtId);
+        map4.put("mtId" , id);
+
+        btn_accept = (Button) findViewById(R.id.btn_accept);
+        //HashMap<String, RequestBody> map4 = new HashMap<>();
+        //map4.put("mtId" , id);
+        Call<ResponseBody> chat4 = retrofitClient.mate.list(token, map3);
+        /*
+        chat4.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try{
+                    if(response.body().string().equals("")){
+                        Log.v("result", "이거 안 된 거 맞냐");
+                        Log.d("Test", response.toString());
+                    } else {
+                        Log.v("Test", "이거 된 거 맞냐");
+                        Log.d("Test", response.body().string());
+                        btn_friend.setEnabled(false);
+                        btn_accept.setEnabled(true);
+                        //btn_friend.setEnabled(false);
+                    }
+                } catch(Exception e){
+                    Log.v("Test", "error");
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("test",t.toString());
+            }
+        });
+
+         */
+
+        // 이미 친구 요청을 보냈을 때
+        Call<ResponseBody> chat6 = retrofitClient.mate.list(token, map4);
+        /*
+        chat6.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try{
+                    String res = response.body().string();
+                    if(res.equals("")){
+                        // 내가 보낸 친구요청이 없을 때
+                        Log.v("result", "이거 안 된 거 맞냐");
+                        Log.d("Test", response.toString());
+                        btn_friend.setEnabled(true);
+                    } else if(res.equals("0")){
+                        // 내가 보낸 친구요청이 있을 때
+                        Log.v("Test", "이거 된 거 맞냐");
+                        Log.d("Test", "내용"+response.body().string());
+                        btn_friend.setEnabled(false);
+                        btn_friend.setText("친구요청보냄");
+                    } else {
+                        Log.v("Test", "너네 이미 친구");
+                        Log.d("Test", "내용2" + res);
+                        //btn_friend.setEnabled(false);
+                        //btn_accept.setEnabled(false);
+                        //btn_accept.setText("이미 친구 사이~");
+                    }
+                } catch(Exception e){
+                    Log.v("Test", "error");
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("test",t.toString());
+            }
+        });
+
+         */
+
+        Call<ResponseBody> chat7 = retrofitClient.mate.list(token, map3);
+        chat7.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try{
+                    String res = response.body().string();
+                    if(res.equals("1")) {
+                        // 이미 친구가 되어있을 때
+                        btn_accept.setEnabled(false);
+                        btn_friend.setEnabled(false);
+                        btn_accept.setText("Healthy Buddy");
+                    } else if (res.equals("0")){
+                        // 친구는 아닌데 요청은 왔을 때
+                        Log.v("test","이게 아닌데?");
+                        btn_friend.setEnabled(false);
+                        btn_accept.setEnabled(true);
+                    } else {
+                        alreadyFriend(chat6);
+                    }
+                } catch(Exception e){
+                    Log.v("Test", "error");
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("test",t.toString());
+            }
+        });
+
+        btn_friend = (Button) findViewById(R.id.btn_friend);
+        btn_friend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 친구 요청을 보내는 버튼
+                // 두 사람의 프로필 공개 여부를 비공개로 바꿔야 함
+                Call<ResponseBody> chat3 = retrofitClient.mate.create(token, map3);
+                chat3.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            if(response.body().string().equals("1")) {
+                                Log.v("Test", "성공");
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MessageActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("친구 요청을 보냈습니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+
+                                btn_friend.setEnabled(false);
+                                btn_friend.setText("친구요청보냄");
+                            } else {
+                                Log.v("result", "실패");
+                            }
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.d("test",t.toString());
+                    }
+                });
+            }
+        });
+
+        btn_accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 친구 요청을 받는 버튼 (친구 요청을 받았을 때 enable)
+                /*
+                만약에 mate table에 정보가 있으면 mtAccept를 1로 update한다
+                따로 친구를 볼 수 있는 창이 있어야 할 듯 거기서 친구 삭제와 차단을 할 수 있도록 하자
+                 */
+                Call<ResponseBody> chat5 = retrofitClient.mate.accept(token, map3);
+                chat5.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            if(response.body().string().equals("1")) {
+                                Log.v("Test", "성공");
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MessageActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("친구 요청을 승락했습니다.\n프로필을 비공개로 변경합니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+
+                                btn_accept.setEnabled(false);
+                                btn_accept.setText("Health Buddy");
+                            } else {
+                                Log.v("result", "실패");
+                            }
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.d("test",t.toString());
+                    }
+                });
+
+            }
+        });
 
     }
 
@@ -192,4 +379,39 @@ public class MessageActivity extends AppCompatActivity {
         return pref.getString(key, "");
     }
 
+    public void alreadyFriend( Call<ResponseBody> chat6){
+        chat6.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try{
+                    String res = response.body().string();
+                    if(res.equals("")){
+                        // 내가 보낸 친구요청이 없을 때
+                        Log.v("result", "이거 안 된 거 맞냐");
+                        Log.d("Test", response.toString());
+                        btn_friend.setEnabled(true);
+                    } else if(res.equals("0")){
+                        // 내가 보낸 친구요청이 있을 때
+                        Log.v("Test", "이거 된 거 맞냐");
+                        Log.d("Test", "내용"+response.body().string());
+                        btn_friend.setEnabled(false);
+                        btn_friend.setText("친구요청보냄");
+                    } else {
+                        Log.v("Test", "너네 이미 친구");
+                        Log.d("Test", "내용2" + res);
+                        //btn_friend.setEnabled(false);
+                        //btn_accept.setEnabled(false);
+                        //btn_accept.setText("이미 친구 사이~");
+                    }
+                } catch(Exception e){
+                    Log.v("Test", "error");
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("test",t.toString());
+            }
+        });
+    }
 }

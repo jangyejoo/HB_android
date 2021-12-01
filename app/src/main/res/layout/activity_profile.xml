@@ -220,8 +220,7 @@
         android:ems="10"
         android:gravity="start|top"
         android:hint="짧은 소개글"
-        android:inputType="textMultiLine"
-        android:lines="7"
+        android:maxLength="60"
         android:scrollbars="vertical" />
 
     <CheckBox
