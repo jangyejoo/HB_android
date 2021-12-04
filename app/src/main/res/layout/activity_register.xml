@@ -12,6 +12,8 @@
         android:orientation="horizontal"
         android:weightSum="10"
         android:layout_marginTop="200dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
         >
 
         <EditText
@@ -40,13 +42,17 @@
         android:ems="10"
         android:hint="비밀번호를 입력하시오"
         android:inputType="textPassword"
-        android:minHeight="48dp" />
+        android:minHeight="48dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"/>
 
     <TextView
         android:id="@+id/tv_rg_condition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="영문자,숫자,특수문자 포함 8~16자" />
+        android:text="영문자,숫자,특수문자 포함 8~16자"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"/>
 
     <EditText
         android:id="@+id/et_rg_pwdCheck"
@@ -56,19 +62,25 @@
         android:ems="10"
         android:hint="비밀번호 재확인"
         android:inputType="textPassword"
-        android:minHeight="48dp" />
+        android:minHeight="48dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"/>
 
     <TextView
         android:id="@+id/tv_rg_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="" />
+        android:text=""
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
         >
 
         <EditText
@@ -94,6 +106,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:enabled="false"
-        android:text="회원가입" />
+        android:text="회원가입"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"/>
 
 </LinearLayout>

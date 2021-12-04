@@ -61,6 +61,21 @@
             android:label="MessageActivity"
             android:windowSoftInputMode="adjustPan">
         </activity>
+        <activity
+            android:name=".BuddyActivity"
+            android:label="BuddyActivity">
+        </activity>
+        <activity
+            android:name=".ChatAllActivity"
+            android:label="ChatAllActivity">
+        </activity>
+        <activity
+            android:name=".MainActivity">
+        </activity>
+        <activity
+            android:name=".UpdateProfileActivity"
+            android:label="UpdateProfileActivity">
+        </activity>
     </application>
 
 </manifest>

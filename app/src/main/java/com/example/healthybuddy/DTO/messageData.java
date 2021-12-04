@@ -9,15 +9,6 @@ public class messageData {
     public String mgDate;
 
     public int viewType;
-/*
-    public messageData(String pNickname, String pImg, String mgSender, String mgDetail, String mgDate){
-        this.pNickname=pNickname;
-        this.pImg=pImg;
-        this.mgSender=mgSender;
-        this.mgDetail=mgDetail;
-        this.mgDate=mgDate;
-    }
-     */
 
     public String getpNickname() {return pNickname;}
     public String getpImg() {return pImg;}

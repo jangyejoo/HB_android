@@ -67,6 +67,7 @@ public class ChatAdapter extends BaseAdapter {
                 //intent.putExtra("cIdx",data.get(position).cIdx);
                 intent.putExtra("cId",data.get(position).cId);
                 intent.putExtra("crId",data.get(position).crId);
+                intent.putExtra("cNick", data.get(position).pNickname);
                 view.getContext().startActivity(intent);
             }
         });

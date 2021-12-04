@@ -167,6 +167,7 @@ public class RegisterActivity extends Activity {
                 // 아이디, 이메일 중복 여부
                 idcheck();
                 emailcheck();
+                Log.d("test","id"+dupId+", email"+dupEmail);
 
                 RetrofitClient retrofitClient = new RetrofitClient();
                 RegisterDTO dto = new RegisterDTO(userId.getText().toString(),userPwd.getText().toString(),userMail.getText().toString());
@@ -272,7 +273,7 @@ public class RegisterActivity extends Activity {
                 try{
                     if(response.body().string().equals("1")){
                         Log.v("Test", response.body().string());
-                        Toast.makeText(RegisterActivity.this,"중복된 아이디입니다.", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(RegisterActivity.this,"중복된 아이디입니다.", Toast.LENGTH_SHORT).show();
                         userId.requestFocus();
                         dupId=0;
                         return;
@@ -303,7 +304,7 @@ public class RegisterActivity extends Activity {
                     if(response.body().string().equals("1")) {
                         Log.v("Test", "실패");
                         Log.v("email", response.body().toString());
-                        Toast.makeText(RegisterActivity.this,"중복된 이메일입니다.", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(RegisterActivity.this,"중복된 이메일입니다.", Toast.LENGTH_SHORT).show();
                         userMail.requestFocus();
                         dupEmail=0;
                         return;

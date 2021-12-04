@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,7 +34,7 @@ import retrofit2.Response;
 
 public class MessageActivity extends AppCompatActivity {
     private RecyclerView c_RecyclerView = null;
-    private String pId, token, cId, crId;
+    private String pId, token, cId, crId, cNick;
     private Button btn, btn_friend, btn_accept;
 
     @Override
@@ -54,6 +55,8 @@ public class MessageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         cId = intent.getStringExtra("cId");
         crId = intent.getStringExtra("crId");
+        cNick = intent.getStringExtra("cNick");
+        setTitle(cNick);
 
         Log.d("test","cId : "+cId);
         Log.d("test","crId : "+crId);
@@ -191,72 +194,9 @@ public class MessageActivity extends AppCompatActivity {
         //HashMap<String, RequestBody> map4 = new HashMap<>();
         //map4.put("mtId" , id);
         Call<ResponseBody> chat4 = retrofitClient.mate.list(token, map3);
-        /*
-        chat4.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try{
-                    if(response.body().string().equals("")){
-                        Log.v("result", "이거 안 된 거 맞냐");
-                        Log.d("Test", response.toString());
-                    } else {
-                        Log.v("Test", "이거 된 거 맞냐");
-                        Log.d("Test", response.body().string());
-                        btn_friend.setEnabled(false);
-                        btn_accept.setEnabled(true);
-                        //btn_friend.setEnabled(false);
-                    }
-                } catch(Exception e){
-                    Log.v("Test", "error");
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("test",t.toString());
-            }
-        });
-
-         */
 
         // 이미 친구 요청을 보냈을 때
         Call<ResponseBody> chat6 = retrofitClient.mate.list(token, map4);
-        /*
-        chat6.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try{
-                    String res = response.body().string();
-                    if(res.equals("")){
-                        // 내가 보낸 친구요청이 없을 때
-                        Log.v("result", "이거 안 된 거 맞냐");
-                        Log.d("Test", response.toString());
-                        btn_friend.setEnabled(true);
-                    } else if(res.equals("0")){
-                        // 내가 보낸 친구요청이 있을 때
-                        Log.v("Test", "이거 된 거 맞냐");
-                        Log.d("Test", "내용"+response.body().string());
-                        btn_friend.setEnabled(false);
-                        btn_friend.setText("친구요청보냄");
-                    } else {
-                        Log.v("Test", "너네 이미 친구");
-                        Log.d("Test", "내용2" + res);
-                        //btn_friend.setEnabled(false);
-                        //btn_accept.setEnabled(false);
-                        //btn_accept.setText("이미 친구 사이~");
-                    }
-                } catch(Exception e){
-                    Log.v("Test", "error");
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("test",t.toString());
-            }
-        });
-
-         */
 
         Call<ResponseBody> chat7 = retrofitClient.mate.list(token, map3);
         chat7.enqueue(new Callback<ResponseBody>() {
@@ -308,8 +248,6 @@ public class MessageActivity extends AppCompatActivity {
                                         .setPositiveButton("확인", null)
                                         .create()
                                         .show();
-                                AlertDialog alertDialog = builder.create();
-                                alertDialog.show();
 
                                 btn_friend.setEnabled(false);
                                 btn_friend.setText("친구요청보냄");
@@ -350,8 +288,6 @@ public class MessageActivity extends AppCompatActivity {
                                         .setPositiveButton("확인", null)
                                         .create()
                                         .show();
-                                AlertDialog alertDialog = builder.create();
-                                alertDialog.show();
 
                                 btn_accept.setEnabled(false);
                                 btn_accept.setText("Health Buddy");

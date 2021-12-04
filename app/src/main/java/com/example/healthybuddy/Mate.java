@@ -1,6 +1,7 @@
 package com.example.healthybuddy;
 
 import com.example.healthybuddy.DTO.ChatDTO;
+import com.example.healthybuddy.DTO.ProfileDTO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,5 +26,13 @@ public interface Mate {
     @Multipart
     @POST("accept_mate")
     Call<ResponseBody> accept (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
+    @POST("buddy")
+    Call<ProfileDTO> buddy(@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
+    @POST("delete_mate")
+    Call<ResponseBody> delete (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
 
 }

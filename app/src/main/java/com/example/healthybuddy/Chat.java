@@ -19,6 +19,10 @@ public interface Chat {
     Call<List<ChatDTO>> list (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
 
     @Multipart
+    @POST("chatAll")
+    Call<List<ChatDTO>> listAll (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
     @POST("create_chat")
     Call<ResponseBody> create (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
 }

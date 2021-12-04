@@ -35,19 +35,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         nListCnt = data.size();
     }
 
-    /*
-    @Override
-    public int getCount() {
-        return nListCnt;
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return null;
-    }
-
-
-     */
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -1,5 +1,9 @@
 package com.example.healthybuddy;
 
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.INPUT_METHOD_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -13,8 +17,10 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,10 +37,13 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
 
 import java.io.ByteArrayOutputStream;
@@ -43,7 +52,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -52,10 +60,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileActivity  extends AppCompatActivity {
+public class frag_setting extends Fragment {
+    View view;
     private ImageView pImg;
     private EditText pNickname, pGym, pDetail;
-    private Button btn_update, btn_find, btn_finish;
+    private Button btn_update, btn_find;
     private Spinner sp_pAge, sp_pHeight, sp_pWeight;
     private CheckBox mon, tue, wed, thr, fri, sat, sun, open;
     private RadioGroup rg_pSex;
@@ -70,35 +79,37 @@ public class ProfileActivity  extends AppCompatActivity {
     // Gym
     private ActivityResultLauncher<Intent> resultLauncher;
     private String Gym;
+    public static frag_setting newInstance() {
+        return new frag_setting();
+    }
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-        setTitle("프로필 설정");
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.activity_updateprofile, container, false);
+        getActivity().setTitle("프로필 변경");
 
         // 값 가져오기
-        pImg = (ImageView) findViewById(R.id.iv_img);
-        pNickname = (EditText) findViewById(R.id.et_nickname);
-        pGym = (EditText)findViewById(R.id.et_gym);
-        //btn_update = (Button)findViewById(R.id.btn_image);
-        btn_find = (Button)findViewById(R.id.btn_find);
-        sp_pAge = (Spinner) findViewById(R.id.spinner_age);
-        sp_pHeight = (Spinner) findViewById(R.id.spinner_height);
-        sp_pWeight = (Spinner) findViewById(R.id.spinner_weight);
-        pMale = (RadioButton)findViewById(R.id.rb_male);
-        pFemale = (RadioButton)findViewById(R.id.rb_female);
-        rg_pSex = (RadioGroup)findViewById(R.id.rg_sex);
-        mon = (CheckBox) findViewById(R.id.cb_mon);
-        tue = (CheckBox) findViewById(R.id.cb_tue);
-        wed = (CheckBox) findViewById(R.id.cb_wed);
-        thr = (CheckBox) findViewById(R.id.cb_thr);
-        fri = (CheckBox) findViewById(R.id.cb_fri);
-        sat = (CheckBox) findViewById(R.id.cb_sat);
-        sun = (CheckBox) findViewById(R.id.cb_sun);
-        open = (CheckBox) findViewById(R.id.cb_open);
-        pDetail = (EditText) findViewById(R.id.et_msg);
-        btn_finish = (Button) findViewById(R.id.btn_finish);
+        pImg = (ImageView) view.findViewById(R.id.iv_img);
+        pNickname = (EditText) view.findViewById(R.id.et_nickname);
+        pGym = (EditText)view.findViewById(R.id.et_gym);
+        btn_find = (Button)view.findViewById(R.id.btn_find);
+        sp_pAge = (Spinner) view.findViewById(R.id.spinner_age);
+        sp_pHeight = (Spinner) view.findViewById(R.id.spinner_height);
+        sp_pWeight = (Spinner) view.findViewById(R.id.spinner_weight);
+        pMale = (RadioButton)view.findViewById(R.id.rb_male);
+        pFemale = (RadioButton)view.findViewById(R.id.rb_female);
+        rg_pSex = (RadioGroup)view.findViewById(R.id.rg_sex);
+        mon = (CheckBox) view.findViewById(R.id.cb_mon);
+        tue = (CheckBox) view.findViewById(R.id.cb_tue);
+        wed = (CheckBox) view.findViewById(R.id.cb_wed);
+        thr = (CheckBox) view.findViewById(R.id.cb_thr);
+        fri = (CheckBox) view.findViewById(R.id.cb_fri);
+        sat = (CheckBox) view.findViewById(R.id.cb_sat);
+        sun = (CheckBox) view.findViewById(R.id.cb_sun);
+        open = (CheckBox) view.findViewById(R.id.cb_open);
+        pDetail = (EditText) view.findViewById(R.id.et_msg);
+        btn_update = (Button) view.findViewById(R.id.btn_update);
 
 
         pId = ((LoginActivity)LoginActivity.context).userID;
@@ -122,7 +133,6 @@ public class ProfileActivity  extends AppCompatActivity {
 
         RetrofitClient retrofitClient = new RetrofitClient();
         Call<List<RegisterDTO>> member = retrofitClient.login.members(token);
-
         member.enqueue(new Callback<List<RegisterDTO>>(){
             @Override
             public void onResponse(Call<List<RegisterDTO>> call, Response<List<RegisterDTO>> response){
@@ -131,9 +141,9 @@ public class ProfileActivity  extends AppCompatActivity {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(ProfileActivity.this,"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
                     Intent intent = null;
-                    intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                    intent = new Intent(getActivity(), LoginActivity.class);
                     startActivity(intent);
                 }
 
@@ -160,7 +170,7 @@ public class ProfileActivity  extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = null;
-                intent = new Intent(ProfileActivity.this, GymActivity.class);
+                intent = new Intent(getActivity(), GymActivity.class);
                 resultLauncher.launch(intent);
             }
         });
@@ -173,7 +183,7 @@ public class ProfileActivity  extends AppCompatActivity {
         }
 
         ArrayAdapter<String> age = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, items_age);
+                getActivity(), android.R.layout.simple_spinner_item, items_age);
         age.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         sp_pAge.setAdapter(age);
@@ -200,7 +210,7 @@ public class ProfileActivity  extends AppCompatActivity {
         }
 
         ArrayAdapter<String> height = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, items_height);
+                getActivity(), android.R.layout.simple_spinner_item, items_height);
         height.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         sp_pHeight.setAdapter(height);
@@ -227,7 +237,7 @@ public class ProfileActivity  extends AppCompatActivity {
         }
 
         ArrayAdapter<String> weight = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, items_weight);
+                getActivity(), android.R.layout.simple_spinner_item, items_weight);
         weight.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         sp_pWeight.setAdapter(weight);
@@ -339,7 +349,6 @@ public class ProfileActivity  extends AppCompatActivity {
         });
 
         // open
-        pOpen="0";
         open.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -352,7 +361,86 @@ public class ProfileActivity  extends AppCompatActivity {
             }
         });
 
-        btn_finish.setOnClickListener(new View.OnClickListener() {
+
+        HashMap<String, RequestBody> map = new HashMap<>();
+        RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);
+        map.put("pId", id);
+
+        Call<ProfileDTO> profile = retrofitClient.profile.profile(token, map);
+        profile.enqueue(new Callback<ProfileDTO>() {
+            @Override
+            public void onResponse(Call<ProfileDTO> call, Response<ProfileDTO> response) {
+                try{
+                    if(!response.isSuccessful()){
+                        Log.d("test","뭔가 잘못됐다");
+                    }else {
+                        ProfileDTO post = response.body();
+                        Glide.with(pImg.getContext()).load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg()).into(pImg);
+                        pNickname.setText(post.getpNickname());
+                        pGym.setText(post.getpGym());
+                        pAge=post.getpAge();
+                        pHeight=post.getpHeight();
+                        pWeight=post.getpWeight();
+                        pDetail.setText(post.getpDetail());
+                        pSex= String.valueOf(post.getpSex());
+                        pOpen=String.valueOf(post.getpOpen());
+
+                        // 나이
+                        int selectionPosition= age.getPosition(post.getpAge());
+                        sp_pAge.setSelection(selectionPosition);
+
+                        // 키
+                        int selectionPosition2= height.getPosition(post.getpHeight());
+                        sp_pHeight.setSelection(selectionPosition2);
+
+                        // 몸무게
+                        int selectionPosition3= weight.getPosition(post.getpWeight());
+                        sp_pWeight.setSelection(selectionPosition3);
+
+                        // 루틴
+                        char[] arr = new char[7];
+                        for (int i = 0; i <7; i++) {
+                            items_routine[i] = String.valueOf(post.getpRoutine().charAt(i));
+                        }
+
+                        Log.d("Test", String.valueOf(items_routine));
+                        if(items_routine[0].equals("1")){ mon.setChecked(true); }
+                        if(items_routine[1].equals("1")){ tue.setChecked(true); }
+                        if(items_routine[2].equals("1")){ wed.setChecked(true); }
+                        if(items_routine[3].equals("1")){ thr.setChecked(true); }
+                        if(items_routine[4].equals("1")){ fri.setChecked(true); }
+                        if(items_routine[5].equals("1")){ sat.setChecked(true); }
+                        if(items_routine[6].equals("1")){ sun.setChecked(true); }
+
+                        // 성별 표시
+                        if(post.getpSex()==0){
+                            pMale.setChecked(true);
+                        }
+                        if(post.getpSex()==1){
+                            pFemale.setChecked(true);
+                        }
+
+                        // open 표시
+                        if(post.getpOpen()==0){
+                            open.setChecked(false);
+                        }
+                        if(post.getpOpen()==1){
+                            open.setChecked(true);
+                        }
+                    }
+                }catch(Exception e){
+                    Log.v("Test", "catch"+e.toString());
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProfileDTO> call, Throwable t) {
+                Log.v("test","failure"+t.toString());
+            }
+        });
+
+        btn_update.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
@@ -383,48 +471,47 @@ public class ProfileActivity  extends AppCompatActivity {
                 map.put("pDetail",detail);
                 map.put("pOpen",open);
 
-                if(destFile==null){
-                    Toast.makeText(ProfileActivity.this, "프로필 사진을 설정하세요.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Log.d("Test",destFile.getPath());
-                Log.d("Test",String.valueOf(destFile.length()/1024));
-                // pImg
-                RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
-                MultipartBody.Part Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
-
                 //ProfileDTO dto = new ProfileDTO(pId,pNickname.getText().toString(),pGym.getText().toString(),pAge,pHeight,pWeight,pSex,pRoutine,pDetail.getText().toString(),"test",pOpen);
                 Log.d("Test", pId + pNickname.getText().toString() + pGym.getText().toString() + pAge + pHeight + pWeight + pSex+pRoutine+pDetail.getText().toString()+"test"+pOpen);
 
-
                 // 유효성 검사
                 if(pNickname.getText().toString().length()==0){
-                    Toast.makeText(ProfileActivity.this, "닉네임을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "닉네임을 입력하세요.", Toast.LENGTH_SHORT).show();
                     pNickname.requestFocus();
                     return;
                 }
                 if(pGym.getText().toString().length()==0){
-                    Toast.makeText(ProfileActivity.this, "헬스장을 선택하세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "헬스장을 선택하세요.", Toast.LENGTH_SHORT).show();
                     pGym.requestFocus();
                     return;
                 }
                 if(pSex=="-1"){
-                    Toast.makeText(ProfileActivity.this, "성별을 선택하세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "성별을 선택하세요.", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if(pDetail.getText().toString().length()==0){
-                    Toast.makeText(ProfileActivity.this, "상태 메시지를 입력하세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "상태 메시지를 입력하세요.", Toast.LENGTH_SHORT).show();
                     pDetail.requestFocus();
                     return;
                 }
 
-                // json으로 던져주기
-                //Call<ResponseBody> create = retrofitClient.profile.create(token,dto);
-                Call<ResponseBody> create = retrofitClient.profile.create(token,Bmp,map);
-                //Log.d("Test", dto.toString());
+                // img 바꿀 때랑 안바꿀 때 분기 나누어야 할 듯
+                MultipartBody.Part Bmp;
+                Call<ResponseBody> update;
+                if(destFile!=null){
+                    Log.d("Test",destFile.getPath());
+                    Log.d("Test",String.valueOf(destFile.length()/1024));
 
-                create.enqueue(new Callback<ResponseBody>() {
+                    // pImg
+                    RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
+                    Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
+                    update = retrofitClient.profile.update(token,Bmp,map);
+                }else {
+                    update = retrofitClient.profile.update2(token,map);
+                }
+
+                // json으로 던져주기
+                update.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try{
@@ -434,9 +521,9 @@ public class ProfileActivity  extends AppCompatActivity {
                             } else {
                                 Log.v("Test", "성공");
 
-                                Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(),"프로필 변경 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = null;
-                                intent = new Intent(ProfileActivity.this, MainActivity.class);
+                                intent = new Intent(getActivity(), MainActivity.class);
                                 startActivity(intent);
                             }
                         } catch(Exception e){
@@ -452,72 +539,27 @@ public class ProfileActivity  extends AppCompatActivity {
                 });
             }
         });
-
-    }
-
-    //내부 저장소에 저장된 데이터 가져오기
-    public String getPreferenceString(String key) {
-        SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
-        return pref.getString(key, "");
+        return view;
     }
 
     //화면 터치 시 키보드 내려감
-    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        View focusView = getCurrentFocus();
+        View focusView = getActivity().getCurrentFocus();
         if (focusView != null) {
             Rect rect = new Rect();
             focusView.getGlobalVisibleRect(rect);
             int x = (int) ev.getX(), y = (int) ev.getY();
             if (!rect.contains(x, y)) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
                 if (imm != null)
                     imm.hideSoftInputFromWindow(focusView.getWindowToken(), 0);
                 focusView.clearFocus();
             }
         }
-        return super.dispatchTouchEvent(ev);
+        return super.getActivity().dispatchTouchEvent(ev);
     }
 
-    private String getRealPathFromURI(Uri contentUri) {
-        if (contentUri.getPath().startsWith("/storage")) {
-            Log.d("test", contentUri.getPath());
-            return contentUri.getPath();
-        }
-        String id = DocumentsContract.getDocumentId(contentUri).split(":")[1];
-        String[] columns = { MediaStore.Files.FileColumns.DATA };
-        String selection = MediaStore.Files.FileColumns._ID + " = " + id;
-        Cursor cursor = getContentResolver().query(MediaStore.Files.getContentUri("external"), columns, selection, null, null);
-        try {
-            int columnIndex = cursor.getColumnIndex(columns[0]);
-            if (cursor.moveToFirst()) {
-                Log.d("test", cursor.getString(columnIndex));
-                return cursor.getString(columnIndex);
-            }
-        } finally {
-            cursor.close();
-        }
-        return null;
-    }
-
-    private void SendImage(){
-        Log.d("test", "2");
-        // RequestBody로 변환 후 MultipartBody.Part로 파일 컨버전
-        RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
-        MultipartBody.Part Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
-
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
-        Log.d("test", token);
-        Log.d("test", destFile.getName());
-
-        // Api 호출
-        RetrofitClient retrofitClient = new RetrofitClient();
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //이미지 뷰를 클릭하면 시작되는 함수
 
@@ -528,7 +570,7 @@ public class ProfileActivity  extends AppCompatActivity {
             Bitmap bitmap = null;
             //bitmap 이용
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),photoUri);
+                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(),photoUri);
                 //bitmap = rotateImage(bitmap, 90);
                 //사진이 돌아가 있는 경우 rotateImage 함수 이용해서 사진 회전 가능
             } catch (IOException e) {
@@ -542,24 +584,22 @@ public class ProfileActivity  extends AppCompatActivity {
             pImg.setImageBitmap(bitmap);
 
             //아래 커서 이용해서 사진의 경로 불러오기
-            Cursor cursor = getContentResolver().query(Uri.parse(selectedImage.toString()), null, null, null, null);
+            Cursor cursor = getActivity().getContentResolver().query(Uri.parse(selectedImage.toString()), null, null, null, null);
             assert cursor != null;
             cursor.moveToFirst();
             String mediaPath = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA));
             Log.d("test ", mediaPath);
 
             destFile = new File(mediaPath);
+            /*
+            //uploadImage(mediaPath);
+            SendImage();
+            */
+
 
         }else{
-            //Toast.makeText(this, "사진 업로드 실패", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "사진 업로드 실패", Toast.LENGTH_LONG).show();
         }
-    }
-
-    public static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
-                matrix, true);
     }
 
     private Bitmap compressBitmap(Bitmap bitmap){
@@ -570,5 +610,9 @@ public class ProfileActivity  extends AppCompatActivity {
         return compressedBitmap;
     }
 
+    public String getPreferenceString(String key) {
+        SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt",MODE_PRIVATE);
+        return pref.getString(key, "");
+    }
 
 }

@@ -1,15 +1,27 @@
 package com.example.healthybuddy;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.app.ActionBar;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.example.healthybuddy.DTO.IdDTO;
 import com.example.healthybuddy.DTO.ProfileDTO;
@@ -27,15 +39,23 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MemberActivity extends AppCompatActivity {
+public class frag_user extends Fragment {
+    private View view;
     private ListView m_ListView =null;
     private String pId, token;
     private String sex, height, weight, age, routine;
+
+    public frag_user(){
+
+    }
+    public static frag_user newInstance() {
+        return new frag_user();
+    }
+
     @Override
-    protected  void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_member);
-        setTitle("친구");
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
+        view = inflater.inflate(R.layout.activity_member, container, false);
+        getActivity().setTitle("친구");
 
         pId = ((LoginActivity) LoginActivity.context).userID;
         //pId="rds";
@@ -57,9 +77,9 @@ public class MemberActivity extends AppCompatActivity {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(MemberActivity.this,"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
                     Intent intent = null;
-                    intent = new Intent(MemberActivity.this, LoginActivity.class);
+                    intent = new Intent(getActivity(), LoginActivity.class);
                     startActivity(intent);
                 }
 
@@ -83,9 +103,9 @@ public class MemberActivity extends AppCompatActivity {
                         Log.v("Test", "diiiiiiiiiiiiiiiiii");
                     } else {
                         Log.v("Test", "ghhhhhhhh");
-                        Toast.makeText(MemberActivity.this,"프로필 설정 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),"프로필 설정 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
                         Intent intent = null;
-                        intent = new Intent(MemberActivity.this, ProfileActivity.class);
+                        intent = new Intent(getActivity(), ProfileActivity.class);
                         startActivity(intent);
                     }
                 }catch (Exception e){
@@ -104,23 +124,25 @@ public class MemberActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<ProfileDTO>> call, Response<List<ProfileDTO>> response) {
                 try {
-                    if (!response.isSuccessful()) {
+                    if (response.body().isEmpty()) {
                         Log.v("result", "실패");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MemberActivity.this);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setTitle("알림")
                                 .setMessage("같은 헬스장에 앱 이용자가 없습니다.")
                                 .setPositiveButton("확인", null)
                                 .create()
                                 .show();
-                        AlertDialog alertDialog = builder.create();
-                        alertDialog.show();
+                        //AlertDialog alertDialog = builder.create();
+                        //alertDialog.show();
                     } else {
                         ArrayList<itemData> oData = new ArrayList<>();
                         List<ProfileDTO> data = response.body();
+                        Log.d("test","비어있니"+data.isEmpty());
 
 
                         for (ProfileDTO post : data) {
-                            TextView gym = (TextView) findViewById(R.id.tv_gym);
+                            TextView gym = (TextView) view.findViewById(R.id.tv_gym);
                             gym.setText(post.getpGym());
                             sex="";
                             height="";
@@ -133,13 +155,13 @@ public class MemberActivity extends AppCompatActivity {
                                 arr[i] = post.getpRoutine().charAt(i);
                             }
                             Log.d("Test", String.valueOf(arr));
-                            if(arr[6]=='1'){ routine+="월/"; }
-                            if(arr[5]=='1'){ routine+="화/"; }
-                            if(arr[4]=='1'){ routine+="수/"; }
+                            if(arr[0]=='1'){ routine+="월/"; }
+                            if(arr[1]=='1'){ routine+="화/"; }
+                            if(arr[2]=='1'){ routine+="수/"; }
                             if(arr[3]=='1'){ routine+="목/"; }
-                            if(arr[2]=='1'){ routine+="금/"; }
-                            if(arr[1]=='1'){ routine+="토/"; }
-                            if(arr[0]=='1'){ routine+="일/"; }
+                            if(arr[4]=='1'){ routine+="금/"; }
+                            if(arr[5]=='1'){ routine+="토/"; }
+                            if(arr[6]=='1'){ routine+="일/"; }
 
                             Log.v("Test", routine);
 
@@ -156,12 +178,12 @@ public class MemberActivity extends AppCompatActivity {
                             if(post.getpWeight().equals("비공개")) { weight=""; }else { weight= post.getpWeight()+" "; }
                             if(post.getpAge().equals("비공개")) { age=""; }else { age=post.getpAge()+" ";}
 
-                            oItem.Info = sex+height+weight+age+routine.substring(0,routine.length()-1);
+                            oItem.Info = sex+height+weight+age+routine;
                             if(post.getpOpen()==1){oData.add(oItem);}
                         }
 
                         // ListView, Adapter 생성 및 연결 ------------------------
-                        m_ListView = (ListView) findViewById(R.id.listView);
+                        m_ListView = (ListView) view.findViewById(R.id.listView);
                         ListAdapter oAdapter = new ListAdapter(oData);
                         m_ListView.setAdapter(oAdapter);
 
@@ -179,13 +201,11 @@ public class MemberActivity extends AppCompatActivity {
                 Log.v("Test", "error :" +t.toString());
             }
         });
-
+        return view;
     }
-
     //내부 저장소에 저장된 데이터 가져오기
     public String getPreferenceString(String key) {
-        SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
+        SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt",MODE_PRIVATE);
         return pref.getString(key, "");
     }
 }
-

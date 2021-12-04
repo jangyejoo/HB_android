@@ -122,6 +122,7 @@ public class GymActivity extends AppCompatActivity
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                     WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             setContentView(R.layout.activity_gym);
+            setTitle("Google Map");
 
             Intent inIntent = getIntent();
 
@@ -214,7 +215,7 @@ public class GymActivity extends AppCompatActivity
             LatLng curPoint = new LatLng(location.getLatitude(), location.getLongitude());
             String msg = "Latitutde : " + curPoint.latitude
                     + "\nLongitude : " + curPoint.longitude;
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
             //화면 확대, 숫자가 클수록 확대
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
@@ -645,7 +646,7 @@ public class GymActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.d("test", marker.getTitle());
-        Toast.makeText(this, marker.getTitle() + "\n"+marker.getPosition(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, marker.getTitle() + "\n"+marker.getPosition(), Toast.LENGTH_SHORT).show();
         title = marker.getTitle();
         snippet = marker.getSnippet();
         Intent outIntent = new Intent(getApplicationContext(), ProfileActivity.class);

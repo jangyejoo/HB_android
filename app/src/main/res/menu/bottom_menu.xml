@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_member"
+        android:enabled="true"
+        android:icon="@drawable/user"
+        android:title="친구"/>
+    <item
+        android:id="@+id/action_chat"
+        android:enabled="true"
+        android:icon="@drawable/comment"
+        android:title="채팅"/>
+    <item
+        android:id="@+id/action_buddy"
+        android:enabled="true"
+        android:icon="@drawable/handshake"
+        android:title="Healthy Buddy"/>
+    <item
+        android:id="@+id/action_setting"
+        android:enabled="true"
+        android:icon="@drawable/settings"
+        android:title="프로필 변경"/>
+</menu>

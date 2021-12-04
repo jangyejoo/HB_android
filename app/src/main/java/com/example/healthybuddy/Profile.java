@@ -24,12 +24,24 @@ public interface Profile {
     Call<ResponseBody> create(@Header("Authorization") String authorization, @Part MultipartBody.Part pImg, @PartMap HashMap<String, RequestBody> data);
 
     @Multipart
+    @POST("update_profile")
+    Call<ResponseBody> update(@Header("Authorization") String authorization, @Part MultipartBody.Part pImg, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
+    @POST("update_profile")
+    Call<ResponseBody> update2(@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
     @POST("profile_image")
     Call<ResponseBody> image (@Header("Authorization") String authorization, @Part MultipartBody.Part pImg, @PartMap HashMap<String, RequestBody> data);
 
     @Multipart
     @POST("members")
     Call<List<ProfileDTO>> members (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
+
+    @Multipart
+    @POST("profile")
+    Call<ProfileDTO> profile (@Header("Authorization") String authorization, @PartMap HashMap<String, RequestBody> data);
 
     @POST("profilecheck")
     Call<ResponseBody> profileCheck(@Header("Authorization") String authorization, @Body IdDTO objJon);
