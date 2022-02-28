@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "862495090938",
+    "project_id": "healthy-buddy-7790c",
+    "storage_bucket": "healthy-buddy-7790c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862495090938:android:9dc6ca42f06b1f777a4143",
+        "android_client_info": {
+          "package_name": "com.example.healthybuddy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "862495090938-jjq7bii2h1tam7g0kglr6sr9falsn12u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOwUwE34QMF7w5dWUJk58KEzQUJVWj6l0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "862495090938-jjq7bii2h1tam7g0kglr6sr9falsn12u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
