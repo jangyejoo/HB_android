@@ -73,8 +73,8 @@ public class BuddyActivity extends AppCompatActivity {
         pDetail = (TextView) findViewById(R.id.et_msg);
         btn_delete = (Button) findViewById(R.id.btn_delete);
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
         pNickname.setText(pId);
         mate="";
         map2 = new HashMap<>();

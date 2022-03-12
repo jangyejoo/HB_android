@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="70dp"
             android:text="아이디 찾기"
             android:textSize="24sp" />
 
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="70dp"
             android:text="비밀번호 찾기"
             android:textSize="24sp" />
 

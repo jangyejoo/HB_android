@@ -84,8 +84,9 @@ public class frag_buddy extends Fragment {
         pDetail = (TextView) view.findViewById(R.id.et_msg);
         btn_delete = (Button) view.findViewById(R.id.btn_delete);
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        //pId = ((LoginActivity) LoginActivity.context).userID;
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         mate="";
         map2 = new HashMap<>();
@@ -101,9 +102,7 @@ public class frag_buddy extends Fragment {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(getActivity(), LoginActivity.class);
+                    Intent intent = new Intent(getActivity(), AutoLoginActivity.class);
                     startActivity(intent);
                 }
 

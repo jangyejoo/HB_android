@@ -1,5 +1,6 @@
 package com.example.healthybuddy;
 
+import com.example.healthybuddy.DTO.AutoLoginResponse;
 import com.example.healthybuddy.DTO.LoginRequest;
 import com.example.healthybuddy.DTO.LoginResponse;
 import com.example.healthybuddy.DTO.RegisterDTO;
@@ -11,6 +12,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
@@ -31,5 +33,12 @@ public interface Login {
     @Multipart
     @POST("find_pwd")
     Call<ResponseBody> findPwd (@PartMap HashMap<String, RequestBody> data);
+
+    @POST("issue")
+    Call<AutoLoginResponse> autoLogin (@Header("jwt")String token, @Header("mId")String mId);
+
+    @DELETE("logout")
+    Call<Void> logout (@Header("jwt")String token, @Header("mId")String mId);
+
 }
 

@@ -46,8 +46,9 @@ public class frag_chat extends Fragment {
         view = inflater.inflate(R.layout.activity_chat, container, false);
         getActivity().setTitle("채팅");
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        //pId = ((LoginActivity) LoginActivity.context).userID;
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         HashMap<String, RequestBody> map = new HashMap<>();
         RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);
@@ -65,9 +66,7 @@ public class frag_chat extends Fragment {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(getActivity(), LoginActivity.class);
+                    Intent intent = new Intent(getActivity(), AutoLoginActivity.class);
                     startActivity(intent);
                 }
             }

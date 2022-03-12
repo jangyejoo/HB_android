@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -57,9 +58,9 @@ public class frag_user extends Fragment {
         view = inflater.inflate(R.layout.activity_member, container, false);
         getActivity().setTitle("친구");
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        //pId="rds";
-        token = "Bearer " + getPreferenceString(pId);
+        //pId = ((LoginActivity) LoginActivity.context).userID;
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         HashMap<String, RequestBody> map = new HashMap<>();
         RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);
@@ -77,9 +78,7 @@ public class frag_user extends Fragment {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(getActivity(), LoginActivity.class);
+                    Intent intent = new Intent(getActivity(), AutoLoginActivity.class);
                     startActivity(intent);
                 }
 

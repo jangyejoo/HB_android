@@ -64,7 +64,7 @@ public class frag_setting extends Fragment {
     View view;
     private ImageView pImg;
     private EditText pNickname, pGym, pDetail;
-    private Button btn_update, btn_find;
+    private Button btn_update, btn_find, btn_logout;
     private Spinner sp_pAge, sp_pHeight, sp_pWeight;
     private CheckBox mon, tue, wed, thr, fri, sat, sun, open;
     private RadioGroup rg_pSex;
@@ -110,10 +110,12 @@ public class frag_setting extends Fragment {
         open = (CheckBox) view.findViewById(R.id.cb_open);
         pDetail = (EditText) view.findViewById(R.id.et_msg);
         btn_update = (Button) view.findViewById(R.id.btn_update);
+        btn_logout = (Button) view.findViewById(R.id.btn_logout);
 
 
-        pId = ((LoginActivity)LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        //pId = ((LoginActivity) LoginActivity.context).userID;
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
         pNickname.setText(pId);
 
         //Gym
@@ -141,9 +143,7 @@ public class frag_setting extends Fragment {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(getActivity(),"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(getActivity(), LoginActivity.class);
+                    Intent intent = new Intent(getActivity(), AutoLoginActivity.class);
                     startActivity(intent);
                 }
 
@@ -535,6 +535,31 @@ public class frag_setting extends Fragment {
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Log.v("Test", "접속실패");
+                    }
+                });
+            }
+        });
+
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RetrofitClient retrofitClient = new RetrofitClient();
+                String jwt = getPreferenceString("token");
+                Call<Void> logout = retrofitClient.login.logout(jwt, pId);
+                logout.enqueue(new Callback<Void>(){
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response){
+                        if(response.isSuccessful()){
+                            Log.d("Test", "로그아웃 성공");
+                            Intent intent = new Intent(getActivity(), LoginActivity.class);
+                            startActivity(intent);
+                        } else {
+                            Log.d("test", "로그아웃 실패");
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t){
+                        t.printStackTrace();
                     }
                 });
             }

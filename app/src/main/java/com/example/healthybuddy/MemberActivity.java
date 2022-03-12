@@ -37,9 +37,8 @@ public class MemberActivity extends AppCompatActivity {
         setContentView(R.layout.activity_member);
         setTitle("친구");
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        //pId="rds";
-        token = "Bearer " + getPreferenceString(pId);
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         HashMap<String, RequestBody> map = new HashMap<>();
         RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);

@@ -33,8 +33,8 @@ public class ChatAllActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         setTitle("채팅");
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         Intent intent = getIntent();
         result = intent.getStringExtra("id2");

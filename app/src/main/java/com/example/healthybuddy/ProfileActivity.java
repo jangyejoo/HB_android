@@ -101,8 +101,8 @@ public class ProfileActivity  extends AppCompatActivity {
         btn_finish = (Button) findViewById(R.id.btn_finish);
 
 
-        pId = ((LoginActivity)LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
         pNickname.setText(pId);
 
         //Gym

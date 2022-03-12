@@ -67,13 +67,6 @@ public class LoginActivity extends AppCompatActivity {
         goSignup = (TextView) findViewById(R.id.tv_register);
         findId = (TextView) findViewById(R.id.tv_find);
         context=this;
-        //checkBox = findViewById(R.id.autoLogin);
-
-        //자동 로그인을 선택한 유저
-        //if (!getPreferenceString(autoLoginId).equals("") && !getPreferenceString(autoLoginPw).equals("")) {
-        //    checkBox.setChecked(true);
-        //    checkAutoLogin(getPreferenceString(autoLoginId));
-        //}
 
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     //받은 토큰 저장
                     String token = result.getToken();
+                    String token_refresh = result.getRefreshToken();
 
                     String success = "200"; //로그인 성공
                     String errorId = "300"; //아이디 일치x
@@ -161,22 +155,13 @@ public class LoginActivity extends AppCompatActivity {
                         String userPassword = mPwd.getText().toString();
 
                         //다른 통신을 하기 위해 token 저장
-                        setPreference(userID, token);
-
-                        //자동 로그인 여부
-                        //if (checkBox.isChecked()) {
-                        //    setPreference(autoLoginId, userID);
-                        //    setPreference(autoLoginPw, userPassword);
-                        //} else {
-                        //    setPreference(autoLoginId, "");
-                        //    setPreference(autoLoginPw, "");
-                        //}
+                        setPreference("id",userID);
+                        setPreference("token", token);
 
                         Toast.makeText(LoginActivity.this, userID + "님 환영합니다.", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("userId", userID);
                         startActivity(intent);
-                        LoginActivity.this.finish();
 
                     } else if (resultCode.equals(errorId)) {
 

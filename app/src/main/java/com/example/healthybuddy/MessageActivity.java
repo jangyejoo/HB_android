@@ -49,8 +49,8 @@ public class MessageActivity extends AppCompatActivity {
         //InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         //imm.hideSoftInputFromWindow(text.getWindowToken(), 0);
 
-        pId = ((LoginActivity) LoginActivity.context).userID;
-        token = "Bearer " + getPreferenceString(pId);
+        pId = getPreferenceString("id");
+        token = "Bearer " + getPreferenceString("token");
 
         Intent intent = getIntent();
         cId = intent.getStringExtra("cId");
