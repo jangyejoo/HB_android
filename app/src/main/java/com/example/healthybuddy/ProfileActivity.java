@@ -36,6 +36,9 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.healthybuddy.DTO.RegisterDTO;
+import com.example.healthybuddy.DTO.UserModel;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -131,9 +134,7 @@ public class ProfileActivity  extends AppCompatActivity {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(ProfileActivity.this,"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                    Intent intent = new Intent(ProfileActivity.this, AutoLoginActivity.class);
                     startActivity(intent);
                 }
 

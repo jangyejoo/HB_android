@@ -21,6 +21,10 @@
         android:theme="@style/Theme.HealthyBuddy"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".MessageActivity_firebase"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan"/>
+        <activity
             android:name=".ProgressDialog"
             android:exported="true" />
         <activity
@@ -42,19 +46,23 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:label="LoginActivity" />
+            android:label="LoginActivity"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".RegisterActivity"
-            android:label="RegisterActivity" />
+            android:label="RegisterActivity"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".GymActivity"
             android:label="GymActivity" />
         <activity
             android:name=".FindActivity"
-            android:label="FindIDActivity" />
+            android:label="FindIDActivity"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".ProfileActivity"
-            android:label="ProfileActivity" />
+            android:label="ProfileActivity"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".MemberActivity"
             android:label="MemberActivity" />
@@ -74,7 +82,8 @@
         <activity android:name=".MainActivity" />
         <activity
             android:name=".UpdateProfileActivity"
-            android:label="UpdateProfileActivity" />
+            android:label="UpdateProfileActivity"
+            android:windowSoftInputMode="adjustPan"/>
     </application>
 
 </manifest>

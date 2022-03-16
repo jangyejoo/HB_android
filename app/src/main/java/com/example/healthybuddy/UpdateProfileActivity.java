@@ -31,6 +31,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,12 +39,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
+import com.example.healthybuddy.DTO.UserModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -130,9 +136,7 @@ public class UpdateProfileActivity  extends AppCompatActivity {
                     Log.d("Test", data.get(0).getUSER_ID());
                 } else {
                     Log.d("Test", "인증실패");
-                    Toast.makeText(UpdateProfileActivity.this,"다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
-                    Intent intent = null;
-                    intent = new Intent(UpdateProfileActivity.this, LoginActivity.class);
+                    Intent intent = new Intent(UpdateProfileActivity.this, AutoLoginActivity.class);
                     startActivity(intent);
                 }
 

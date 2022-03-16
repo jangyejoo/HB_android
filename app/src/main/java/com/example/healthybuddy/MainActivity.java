@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fm;
     private FragmentTransaction ft;
     private frag_user frag_user;
-    private frag_chat frag_chat;
+    private frag_chatlist frag_chat;
     private frag_buddy frag_buddy;
     private frag_setting frag_setting;
 
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         frag_user = new frag_user();
-        frag_chat = new frag_chat();
+        frag_chat = new frag_chatlist();
         frag_buddy = new frag_buddy();
         frag_setting = new frag_setting();
         setFrag(0); // 첫 프래그먼트 화면 지정

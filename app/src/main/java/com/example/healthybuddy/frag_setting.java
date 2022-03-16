@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,6 +41,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -543,25 +545,36 @@ public class frag_setting extends Fragment {
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RetrofitClient retrofitClient = new RetrofitClient();
-                String jwt = getPreferenceString("token");
-                Call<Void> logout = retrofitClient.login.logout(jwt, pId);
-                logout.enqueue(new Callback<Void>(){
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response){
-                        if(response.isSuccessful()){
-                            Log.d("Test", "로그아웃 성공");
-                            Intent intent = new Intent(getActivity(), LoginActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Log.d("test", "로그아웃 실패");
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t){
-                        t.printStackTrace();
-                    }
-                });
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("알림")
+                        .setMessage("로그아웃을 합니다")
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                RetrofitClient retrofitClient = new RetrofitClient();
+                                String jwt = getPreferenceString("token");
+                                Call<Void> logout = retrofitClient.login.logout(jwt, pId);
+                                logout.enqueue(new Callback<Void>(){
+                                    @Override
+                                    public void onResponse(Call<Void> call, Response<Void> response){
+                                        if(response.isSuccessful()){
+                                            Log.d("Test", "로그아웃 성공");
+                                            Intent intent = new Intent(getActivity(), LoginActivity.class);
+                                            startActivity(intent);
+                                        } else {
+                                            Log.d("test", "로그아웃 실패");
+                                        }
+                                    }
+                                    @Override
+                                    public void onFailure(Call<Void> call, Throwable t){
+                                        t.printStackTrace();
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("취소", null)
+                        .create()
+                        .show();
             }
         });
         return view;

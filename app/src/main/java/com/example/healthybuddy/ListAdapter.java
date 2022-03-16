@@ -1,5 +1,6 @@
 package com.example.healthybuddy;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
@@ -71,13 +72,13 @@ public class ListAdapter extends BaseAdapter {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), ChatActivity.class);
+                Intent intent = new Intent(view.getContext(), MessageActivity_firebase.class);
                 intent.putExtra("id2",data.get(position).id2);
-                view.getContext().startActivity(intent);
+
+                ActivityOptions activityOptions = ActivityOptions.makeCustomAnimation(view.getContext(),R.anim.fromright, R.anim.toleft);
+                view.getContext().startActivity(intent, activityOptions.toBundle());
             }
         });
-
-
         return convertView;
     }
 }
