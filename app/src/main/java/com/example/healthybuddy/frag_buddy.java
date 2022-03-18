@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
 
@@ -138,7 +139,10 @@ public class frag_buddy extends Fragment {
                         alertDialog.show();
                     } else {
                         ProfileDTO post = response.body();
-                        Glide.with(pImg.getContext()).load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg()).into(pImg);
+                        Glide.with(pImg.getContext())
+                                .load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg())
+                                .apply(new RequestOptions().circleCrop())
+                                .into(pImg);
                         pNickname.setText(post.getpNickname());
                         pGym.setText(post.getpGym());
                         pAge.setText(post.getpAge());

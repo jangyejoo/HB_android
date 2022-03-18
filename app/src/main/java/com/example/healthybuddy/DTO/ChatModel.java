@@ -12,5 +12,6 @@ public class ChatModel {
         public String pId;
         public String message;
         public Object timestamp;
+        public Object pre_timestamp;
     }
 }

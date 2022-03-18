@@ -45,10 +45,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -66,6 +69,8 @@ public class MessageActivity_firebase extends AppCompatActivity {
     private itemData destinationUserModel = new itemData();
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+    private List<ChatModel> chatModels = new ArrayList<>();
+    private Object LastTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +154,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 comment.pId = pId;
                 comment.message = text.getText().toString();
                 comment.timestamp = ServerValue.TIMESTAMP;
+                comment.pre_timestamp = LastTimestamp;
 
                 if(chatRoomId==null) {
                     btn.setEnabled(false);
@@ -414,32 +420,136 @@ public class MessageActivity_firebase extends AppCompatActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             MessageViewHolder messageViewHolder = ((MessageViewHolder)holder);
 
+            // last timestamp
+            if(comments.size()>0) {
+                LastTimestamp = comments.get(comments.size() - 1).timestamp;
+            } else {
+                LastTimestamp = (Object) 0;
+            }
+
             long unixTime =  (long)comments.get(position).timestamp;
             Date date = new Date(unixTime);
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
             String time = simpleDateFormat.format(date);
-            messageViewHolder.textView_timestamp.setText(time);
+
+            long pre;
+            long pos;
+            String pre_time=null;
+            String pos_time=null;
+            if(comments.get(position).pre_timestamp==null){
+                pre = 0;
+            } else {
+                pre = (long)comments.get(position).pre_timestamp;
+            }
+
+            // 지금 마지막 메세지가 아닐 때 다음 메세지의 timestamp를 불러옴
+            if(position==comments.size()-1){
+                pos = 0;
+            } else {
+                pos = (long)comments.get(position+1).timestamp;
+            }
+
+            Date pre_date = new Date(pre);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            pre_time = simpleDateFormat.format(pre_date);
+
+            Date pos_date = new Date(pos);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            pos_time = simpleDateFormat.format(pos_date);
 
             if(comments.get(position).pId.equals(pId)){
-                messageViewHolder.textview_name.setVisibility(View.GONE);
-                messageViewHolder.textView_message.setText(comments.get(position).message);
-                //messageViewHolder.textView_message.setBackgroundColor(R.color.hb_dark);
-                messageViewHolder.textView_message.setBackgroundResource(R.drawable.right);
-                messageViewHolder.linearlayout_destination.setVisibility(View.GONE);
-                messageViewHolder.linearlayout_main.setGravity(Gravity.RIGHT);
-                messageViewHolder.linearlayout_right.setGravity(Gravity.RIGHT);
+                if(position==comments.size()-1 ||!time.equals(pos_time)) {
+                    messageViewHolder.textview_name.setVisibility(View.GONE);
+                    messageViewHolder.textView_message.setText(comments.get(position).message);
+                    messageViewHolder.textView_message.setBackgroundResource(R.drawable.right);
+                    messageViewHolder.linearlayout_destination.setVisibility(View.GONE);
+                    messageViewHolder.linearlayout_main.setGravity(Gravity.RIGHT);
+                    messageViewHolder.linearlayout_right.setGravity(Gravity.RIGHT);
+                    messageViewHolder.textView_timestamp.setText(time);
+                } else {
+                    messageViewHolder.textview_name.setVisibility(View.GONE);
+                    messageViewHolder.textView_message.setText(comments.get(position).message);
+                    messageViewHolder.textView_message.setBackgroundResource(R.drawable.right);
+                    messageViewHolder.linearlayout_destination.setVisibility(View.GONE);
+                    messageViewHolder.linearlayout_main.setGravity(Gravity.RIGHT);
+                    messageViewHolder.linearlayout_right.setGravity(Gravity.RIGHT);
+                    messageViewHolder.textView_timestamp.setVisibility(View.GONE);
+                }
             } else {
-                Glide.with(holder.itemView.getContext())
-                        .load(destinationUserModel.img)
-                        .apply(new RequestOptions().circleCrop())
-                        .into(messageViewHolder.imageview_profile);
-                messageViewHolder.textview_name.setText(destinationUserModel.Nickname);
-                messageViewHolder.linearlayout_destination.setVisibility(View.VISIBLE);
-                //messageViewHolder.textView_message.setBackgroundColor(R.color.white);
-                messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
-                messageViewHolder.textView_message.setText(comments.get(position).message);
-                messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                if(position==comments.size()-1){
+                    // 마지막 메세지인데 그 전에 보낸거랑 시간이 다를 때
+                    if(!time.equals(pre_time)){
+                        // 프로필과 닉네임 출력
+                        Glide.with(holder.itemView.getContext())
+                                .load(destinationUserModel.img)
+                                .apply(new RequestOptions().circleCrop())
+                                .into(messageViewHolder.imageview_profile);
+                        messageViewHolder.textview_name.setText(destinationUserModel.Nickname);
+                        messageViewHolder.linearlayout_destination.setVisibility(View.VISIBLE);
 
+                    } else {
+                        // 프로필과 닉네임 생략, 타임 스탬프는 출력
+                        messageViewHolder.textview_name.setVisibility(View.GONE);
+                        messageViewHolder.linearlayout_destination.setVisibility(View.INVISIBLE);
+
+                    }
+                    messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
+                    messageViewHolder.textView_message.setText(comments.get(position).message);
+                    messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                    messageViewHolder.textView_timestamp.setText(time);
+                } else {
+                    // 마지막 메세지가 아닐 때
+
+                    // 바로 전 메세지랑 시간이 다를 때 프로필과 닉네임 출력 근데 또 두 가지로 나뉨
+                    // 그 다음 메세지랑 시간이 같을 때는 타임 스탬프 생략, 다를 때는 타임 스탬프 출력
+
+                    // 바로 전 메세지랑 시간이 같을 때는 프로필과 닉네임 생략 근데 또 두가지로 나뉨
+                    // 그 다음 메세지랑 시간이 같을 때는 타임 스탬프 생략, 다를 때는 타임 스탬프 출력
+                    if(!time.equals(pre_time)){
+                        if(!time.equals(pos_time)) {
+                            Glide.with(holder.itemView.getContext())
+                                    .load(destinationUserModel.img)
+                                    .apply(new RequestOptions().circleCrop())
+                                    .into(messageViewHolder.imageview_profile);
+                            messageViewHolder.textview_name.setText(destinationUserModel.Nickname);
+                            messageViewHolder.linearlayout_destination.setVisibility(View.VISIBLE);
+                            messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
+                            messageViewHolder.textView_message.setText(comments.get(position).message);
+                            messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                            messageViewHolder.textView_timestamp.setText(time);
+                        }else {
+                            Glide.with(holder.itemView.getContext())
+                                    .load(destinationUserModel.img)
+                                    .apply(new RequestOptions().circleCrop())
+                                    .into(messageViewHolder.imageview_profile);
+                            messageViewHolder.textview_name.setText(destinationUserModel.Nickname);
+                            messageViewHolder.linearlayout_destination.setVisibility(View.VISIBLE);
+                            messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
+                            messageViewHolder.textView_message.setText(comments.get(position).message);
+                            messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                            messageViewHolder.textView_timestamp.setVisibility(View.GONE);
+                        }
+                    } else {
+                        // 바로 전 메세지랑 시간이 같을 때
+                        if(!time.equals(pos_time)) {
+                            messageViewHolder.textview_name.setVisibility(View.GONE);
+                            messageViewHolder.linearlayout_destination.setVisibility(View.GONE);
+                            messageViewHolder.linearlayout_right.setPadding(155,0,0,0);
+                            messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
+                            messageViewHolder.textView_message.setText(comments.get(position).message);
+                            messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                            messageViewHolder.textView_timestamp.setText(time);
+                        }else {
+                            messageViewHolder.textview_name.setVisibility(View.GONE);
+                            messageViewHolder.linearlayout_destination.setVisibility(View.GONE);
+                            messageViewHolder.linearlayout_right.setPadding(155,0,0,0);
+                            messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
+                            messageViewHolder.textView_message.setText(comments.get(position).message);
+                            messageViewHolder.linearlayout_main.setGravity(Gravity.LEFT);
+                            messageViewHolder.textView_timestamp.setVisibility(View.GONE);
+                        }
+                    }
+                }
             }
 
         }
