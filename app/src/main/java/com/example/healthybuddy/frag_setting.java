@@ -563,8 +563,16 @@ public class frag_setting extends Fragment {
                                     public void onResponse(Call<Void> call, Response<Void> response){
                                         if(response.isSuccessful()){
                                             Log.d("Test", "로그아웃 성공");
+
+                                            //다른 통신을 하기 위해 token 삭제
+                                            setPreference("id",null);
+                                            setPreference("token", null);
+
+                                            getActivity().finish();
+
                                             Intent intent = new Intent(getActivity(), LoginActivity.class);
                                             startActivity(intent);
+
                                         } else {
                                             Log.d("test", "로그아웃 실패");
                                         }
@@ -655,6 +663,14 @@ public class frag_setting extends Fragment {
     public String getPreferenceString(String key) {
         SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt",MODE_PRIVATE);
         return pref.getString(key, "");
+    }
+
+    //데이터를 내부 저장소에 저장하기
+    public void setPreference(String key, String value) {
+        SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(key, value);
+        editor.apply();
     }
 
 }

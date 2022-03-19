@@ -162,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("userId", userID);
                         startActivity(intent);
+                        finish();
 
                     } else if (resultCode.equals(errorId)) {
 
