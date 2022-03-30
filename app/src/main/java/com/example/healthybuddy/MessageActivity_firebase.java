@@ -1,60 +1,60 @@
 package com.example.healthybuddy;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.text.BoringLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.healthybuddy.DTO.ChatModel;
-import com.example.healthybuddy.DTO.MessageDTO;
 import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
 import com.example.healthybuddy.DTO.itemData;
-import com.example.healthybuddy.DTO.messageData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -67,7 +67,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
 
     private EditText text;
     private String mId, token, pId2, chatRoomId;
-    private Button btn, btn_friend, btn_accept;
+    private Button btn, btn_friend, btn_accept, btn_plus;
     private RecyclerView recyclerView;
     private itemData destinationUserModel = new itemData();
 
@@ -81,6 +81,13 @@ public class MessageActivity_firebase extends AppCompatActivity {
     private ValueEventListener valueEventListener;
     int peopleCount = 0;
 
+    private static final int PICK_FROM_ALBUM = 10;
+    private String currentPhotoPath;
+    private String currentVideoPath;
+    private Uri imageUri;
+
+    private Boolean noRoom = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +100,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
         btn = (Button) findViewById(R.id.message_btn);
         btn_accept = (Button) findViewById(R.id.btn_accept);
         btn_friend = (Button) findViewById(R.id.btn_friend);
+        btn_plus = (Button)findViewById(R.id.message_btn_plus);
         text = (EditText) findViewById(R.id.message_editText);
         recyclerView = (RecyclerView)findViewById(R.id.message_recyclerview);
 
@@ -152,6 +160,40 @@ public class MessageActivity_firebase extends AppCompatActivity {
             }
         });
 
+        ChatModel chatModel = new ChatModel();
+        chatModel.users.put(mId, true);
+        chatModel.users.put(pId2, true);
+
+        checkChatRoom2(new SimpleCallback<Integer>() {
+            @Override
+            public void callback(Integer data) {
+                if(data==1){
+                    // 찾는 방이 있을 때
+                    noRoom = true;
+                    Log.d("test","방이 있어");
+                } else if (data==0) {
+                    // 방이 아예 없을 때
+                    Log.d("test", "방이 아예 없어");
+                } else {
+                    // 찾는 방이 없을 때
+                    noRoom = false;
+                    Log.d("test", "방이 없어");
+                }
+
+                if(!noRoom){
+                    btn.setEnabled(false);
+                    Log.d("test","대체 이게 왜");
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").push().setValue(chatModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d("test","대체 이게 왜2");
+                            checkChatRoom();
+                        }
+                    });
+                }
+            }
+        });
+
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -163,7 +205,10 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 comment.pId = mId;
                 comment.message = text.getText().toString();
                 comment.timestamp = ServerValue.TIMESTAMP;
-                comment.pre_timestamp = LastTimestamp;
+
+                if(text.getText().toString().length()==0){
+                    return;
+                }
 
                 if(chatRoomId==null) {
                     btn.setEnabled(false);
@@ -305,6 +350,65 @@ public class MessageActivity_firebase extends AppCompatActivity {
             }
         });
 
+        btn_plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 사진, 동영상 첨부, 일정 잡기 메뉴로
+                final PopupMenu popupMenu = new PopupMenu(getApplicationContext(),view);
+                getMenuInflater().inflate(R.menu.popup,popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        if(menuItem.getItemId() == R.id.action_menu1){
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            //intent.setType("video/* image/*");
+                            intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                            startActivityForResult(intent,PICK_FROM_ALBUM);
+                        } else if(menuItem.getItemId()==R.id.action_menu2){
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            File photoFile = null;
+                            try{
+                                photoFile = createImageFile();
+                            } catch (IOException ex) {
+
+                            }
+                            if(photoFile!=null){
+                                Uri photoURI = FileProvider.getUriForFile(MessageActivity_firebase.this,
+                                        "com.example.android.fileprovider",
+                                        photoFile);
+                                imageUri = photoURI;
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
+                                startActivityForResult(intent,0);
+                            }
+                        } else if(menuItem.getItemId()==R.id.action_menu3){
+                            Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                            startActivityForResult(intent,1);
+                            /*
+                            File videoFile = null;
+                            try{
+                                videoFile = createVideoFile();
+                            } catch (IOException ex) {
+
+                            }
+                            if(videoFile!=null){
+                                Uri videoURI = FileProvider.getUriForFile(MessageActivity_firebase.this,
+                                        "com.example.android.fileprovider",
+                                        videoFile);
+                                imageUri = videoURI;
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI);
+                                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY,1);
+                                startActivityForResult(intent,1);
+                            }
+
+                             */
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
+            }
+        });
+
         checkChatRoom();
     }
 
@@ -327,19 +431,57 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         btn.setEnabled(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(MessageActivity_firebase.this));
                         recyclerView.setAdapter(new RecyclerViewAdapter());
-
-                        //여기가 문제였다 왜냐???????????????/ 왜냥곤ㅁ아럼;니아ㅓㄹㅁ;ㄴ
-                        //RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter();
-                        //recyclerView.scrollToPosition(recyclerViewAdapter.getItemCount()-1);
                     }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.d("test","error " +error.getMessage());
             }
         });
+    }
+
+    void checkChatRoom2(@NonNull SimpleCallback<Integer> finishedCallback){
+        FirebaseDatabase.getInstance().getReference().child("chatrooms").orderByChild("users/"+mId).equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    Log.d("test","데이터가 없을 때");
+                    finishedCallback.callback(0);
+                    return;
+                }
+                for(DataSnapshot item : snapshot.getChildren()) {
+                    ChatModel chatModel = item.getValue(ChatModel.class);
+                    if (chatModel.users.containsKey(pId2)) {
+                        chatRoomId = item.getKey();
+                        Log.d("test", "chatRoomId2 : " + chatRoomId);
+                        btn.setEnabled(true);
+                        finishedCallback.callback(1);
+                        return;
+                    }
+                }
+                if(chatRoomId==null){
+                    finishedCallback.callback(-1);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d("test","error " +error.getMessage());
+            }
+        });
+    }
+
+    /*
+    public interface SimpleCallback {
+        void callback(Object data);
+    }
+
+     */
+
+    public interface SimpleCallback<T>{
+        void callback(T data);
     }
 
     public void alreadyFriend( Call<ResponseBody> already){
@@ -373,6 +515,76 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 Log.d("test",t.toString());
             }
         });
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private File createVideoFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String videoFileName = "MOVIE_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_MOVIES);
+        File video = File.createTempFile(
+                videoFileName,  /* prefix */
+                ".mp4",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentVideoPath = video.getAbsolutePath();
+        return video;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_FROM_ALBUM && resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+            if (uri.toString().contains("image")){
+                Intent intent = new Intent(MessageActivity_firebase.this, PhotoActivity.class);
+                intent.putExtra("id2",pId2);
+                intent.putExtra("photo",data.getData());
+                intent.putExtra("chatRoomId",chatRoomId);
+                intent.putExtra("mode",0);
+                startActivity(intent);
+            } else if (uri.toString().contains("video")){
+                Intent intent = new Intent(MessageActivity_firebase.this, PhotoActivity.class);
+                intent.putExtra("id2",pId2);
+                intent.putExtra("photo",data.getData());
+                intent.putExtra("chatRoomId",chatRoomId);
+                intent.putExtra("mode",10);
+                startActivity(intent);
+            }
+        } else if (requestCode == 0 && resultCode == RESULT_OK){
+            Intent intent = new Intent(MessageActivity_firebase.this, PhotoActivity.class);
+            intent.putExtra("id2",pId2);
+            intent.putExtra("photo", imageUri);
+            intent.putExtra("chatRoomId",chatRoomId);
+            intent.putExtra("mode",0);
+            startActivity(intent);
+        } else if (requestCode == 1 && resultCode == RESULT_OK){
+            Intent intent = new Intent(MessageActivity_firebase.this, PhotoActivity.class);
+            //Log.d("test","test uri : "+imageUri);
+            //Log.d("test","videoPath : "+currentVideoPath);
+
+            intent.putExtra("id2",pId2);
+            intent.putExtra("photo", data.getData());
+            intent.putExtra("chatRoomId",chatRoomId);
+            intent.putExtra("mode",10);
+            startActivity(intent);
+        }
     }
 
     class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
@@ -453,13 +665,6 @@ public class MessageActivity_firebase extends AppCompatActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             MessageViewHolder messageViewHolder = ((MessageViewHolder)holder);
 
-            // last timestamp
-            if(comments.size()>0) {
-                LastTimestamp = comments.get(comments.size() - 1).timestamp;
-            } else {
-                LastTimestamp = (Object) 0;
-            }
-
             long unixTime =  (long)comments.get(position).timestamp;
             Date date = new Date(unixTime);
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -471,10 +676,11 @@ public class MessageActivity_firebase extends AppCompatActivity {
             long pos;
             String pre_time=null;
             String pos_time=null;
-            if(comments.get(position).pre_timestamp==null){
+
+            if(position==0){
                 pre = 0;
             } else {
-                pre = (long)comments.get(position).pre_timestamp;
+                pre = (long)comments.get(position-1).timestamp;
             }
 
             // 지금 마지막 메세지가 아닐 때 다음 메세지의 timestamp를 불러옴
@@ -499,6 +705,30 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 messageViewHolder.textView_day.setText(time_day);
             }
 
+            if(comments.get(position).imgUrl!=null){
+                if(comments.get(position).imgUrl.contains("images")){
+                    messageViewHolder.textView_message.setVisibility(View.GONE);
+                    messageViewHolder.imageView_play.setVisibility(View.GONE);
+                    messageViewHolder.frameLayout.setVisibility(View.VISIBLE);
+                    messageViewHolder.imageview_message.setVisibility(View.VISIBLE);
+                    Glide.with(holder.itemView.getContext())
+                            .load(comments.get(position).imgUrl)
+                            .override(Target.SIZE_ORIGINAL)
+                            .into(messageViewHolder.imageview_message);
+                } else if (comments.get(position).imgUrl.contains("videos")) {
+                    messageViewHolder.textView_message.setVisibility(View.GONE);
+                    messageViewHolder.frameLayout.setVisibility(View.VISIBLE);
+                    messageViewHolder.imageview_message.setVisibility(View.VISIBLE);
+                    messageViewHolder.imageView_play.setVisibility(View.VISIBLE);
+                    Glide.with(holder.itemView.getContext())
+                            .load(comments.get(position).imgUrl)
+                             .override(Target.SIZE_ORIGINAL)
+                            .into(messageViewHolder.imageview_message);
+                }
+            } else {
+                messageViewHolder.frameLayout.setVisibility(View.GONE);
+            }
+
             if(comments.get(position).pId.equals(mId)){
                 if(position==comments.size()-1 ||!time.equals(pos_time)) {
                     messageViewHolder.textview_name.setVisibility(View.GONE);
@@ -519,6 +749,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                     messageViewHolder.textView_timestamp.setVisibility(View.GONE);
                     setReadCounter(position,messageViewHolder.textview_readCounterLeft);
                 }
+                messageViewHolder.imageview_message.setBackgroundResource(R.drawable.right);
             } else {
                 if(position==comments.size()-1){
                     // 마지막 메세지인데 그 전에 보낸거랑 시간이 다를 때
@@ -599,7 +830,18 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         }
                     }
                 }
+                messageViewHolder.imageview_message.setBackgroundResource(R.drawable.left);
             }
+
+            messageViewHolder.imageview_message.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MessageActivity_firebase.this, PhotoDetailActivity.class);
+                    intent.putExtra("nickname", comments.get(position).pId);
+                    intent.putExtra("photo", comments.get(position).imgUrl);
+                    startActivity(intent);
+                }
+            });
 
         }
 
@@ -652,6 +894,9 @@ public class MessageActivity_firebase extends AppCompatActivity {
             public LinearLayout linearlayout_right;
             public TextView textView_timestamp;
             public TextView textView_day;
+            public ImageView imageview_message;
+            public FrameLayout frameLayout;
+            public ImageView imageView_play;
 
             public MessageViewHolder(View view){
                 super(view);
@@ -665,6 +910,9 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 textview_readCounterLeft = (TextView) view.findViewById(R.id.messageItem_textView_readCounterLeft);
                 textview_readCounterRight = (TextView) view.findViewById(R.id.messageItem_textView_readCounterRight);
                 textView_day = (TextView) view.findViewById(R.id.messageItem_textView_day);
+                imageview_message = (ImageView) view.findViewById(R.id.messageItem_imageView_message);
+                frameLayout = (FrameLayout) view.findViewById(R.id.messageItem_framelayout);
+                imageView_play = (ImageView) view.findViewById(R.id.messageItem_imageView_play);
             }
         }
 
