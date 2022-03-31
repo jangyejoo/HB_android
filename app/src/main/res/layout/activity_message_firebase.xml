@@ -58,7 +58,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/message_btn_plus"
-        android:layout_toLeftOf="@+id/message_btn" />
+        android:layout_toLeftOf="@+id/message_btn"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="true"/>
 
     <Button
         android:id="@+id/message_btn"

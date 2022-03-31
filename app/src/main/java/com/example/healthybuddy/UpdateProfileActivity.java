@@ -37,6 +37,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
 import com.example.healthybuddy.DTO.UserModel;
@@ -368,7 +369,10 @@ public class UpdateProfileActivity  extends AppCompatActivity {
                         Log.d("test","뭔가 잘못됐다");
                     }else {
                         ProfileDTO post = response.body();
-                        Glide.with(pImg.getContext()).load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg()).into(pImg);
+                        Glide.with(pImg.getContext())
+                                .load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/"+post.getpImg())
+                                .apply(new RequestOptions().circleCrop())
+                                .into(pImg);
                         pNickname.setText(post.getpNickname());
                         pGym.setText(post.getpGym());
                         pAge=post.getpAge();
@@ -379,20 +383,32 @@ public class UpdateProfileActivity  extends AppCompatActivity {
                         pSex= String.valueOf(post.getpSex());
                         pOpen=String.valueOf(post.getpOpen());
 
+                        // 나이
+                        int selectionPosition= age.getPosition(post.getpAge());
+                        sp_pAge.setSelection(selectionPosition);
+
+                        // 키
+                        int selectionPosition2= height.getPosition(post.getpHeight());
+                        sp_pHeight.setSelection(selectionPosition2);
+
+                        // 몸무게
+                        int selectionPosition3= weight.getPosition(post.getpWeight());
+                        sp_pWeight.setSelection(selectionPosition3);
+
                         // 루틴
                         char[] arr = new char[7];
                         for (int i = 0; i <7; i++) {
-                            arr[i] = post.getpRoutine().charAt(i);
+                            items_routine[i] = String.valueOf(post.getpRoutine().charAt(i));
                         }
 
-                        Log.d("Test", String.valueOf(arr));
-                        if(arr[6]=='1'){ mon.setChecked(true); }
-                        if(arr[5]=='1'){ tue.setChecked(true); }
-                        if(arr[4]=='1'){ wed.setChecked(true); }
-                        if(arr[3]=='1'){ thr.setChecked(true); }
-                        if(arr[2]=='1'){ fri.setChecked(true); }
-                        if(arr[1]=='1'){ sat.setChecked(true); }
-                        if(arr[0]=='1'){ sun.setChecked(true); }
+                        Log.d("Test", String.valueOf(items_routine));
+                        if(items_routine[0].equals("1")){ mon.setChecked(true); }
+                        if(items_routine[1].equals("1")){ tue.setChecked(true); }
+                        if(items_routine[2].equals("1")){ wed.setChecked(true); }
+                        if(items_routine[3].equals("1")){ thr.setChecked(true); }
+                        if(items_routine[4].equals("1")){ fri.setChecked(true); }
+                        if(items_routine[5].equals("1")){ sat.setChecked(true); }
+                        if(items_routine[6].equals("1")){ sun.setChecked(true); }
 
                         // 성별 표시
                         if(post.getpSex()==0){
@@ -505,7 +521,8 @@ public class UpdateProfileActivity  extends AppCompatActivity {
 
                                 Toast.makeText(UpdateProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = null;
-                                intent = new Intent(UpdateProfileActivity.this, MainActivity.class);
+                                intent = new Intent(UpdateProfileActivity.this, UpdateProfileActivity.class);
+                                finish();
                                 startActivity(intent);
                             }
                         } catch(Exception e){

@@ -1,5 +1,7 @@
 package com.example.healthybuddy;
 
+import static android.text.InputType.TYPE_CLASS_TEXT;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -15,12 +17,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.BoringLayout;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -66,7 +71,7 @@ import retrofit2.Response;
 public class MessageActivity_firebase extends AppCompatActivity {
 
     private EditText text;
-    private String mId, token, pId2, chatRoomId;
+    private String mId, token, pId2, chatRoomId, enter;
     private Button btn, btn_friend, btn_accept, btn_plus;
     private RecyclerView recyclerView;
     private itemData destinationUserModel = new itemData();
@@ -95,6 +100,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
 
         mId = getPreferenceString("id");
         token = "Bearer " + getPreferenceString("token");
+        enter = getPreferenceStringEnter(mId);
 
         pId2 = getIntent().getStringExtra("id2");
         btn = (Button) findViewById(R.id.message_btn);
@@ -191,6 +197,36 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         }
                     });
                 }
+            }
+        });
+
+        if(enter.equals("yes")){
+            // 엔터 누르면 보내지게
+            Log.d("test","바뀌었나?");
+            text.setInputType(InputType.TYPE_CLASS_TEXT);
+            text.setImeOptions(EditorInfo.IME_ACTION_SEND);
+            text.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                    if(i==EditorInfo.IME_ACTION_SEND){
+                        btn.callOnClick();
+                    } else {
+                        return false;
+                    }
+                    return true;
+                }
+            });
+        }
+
+        text.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if(i==EditorInfo.IME_ACTION_SEND){
+                    btn.callOnClick();
+                } else {
+                    return false;
+                }
+                return true;
             }
         });
 
@@ -296,7 +332,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                                 btn_friend.setText("친구요청보냄");
                             } else {
                                 Log.v("result", "실패");
-                            }
+                             }
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
@@ -382,8 +418,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                             }
                         } else if(menuItem.getItemId()==R.id.action_menu3){
                             Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                            startActivityForResult(intent,1);
-                            /*
+
                             File videoFile = null;
                             try{
                                 videoFile = createVideoFile();
@@ -399,8 +434,6 @@ public class MessageActivity_firebase extends AppCompatActivity {
                                 intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY,1);
                                 startActivityForResult(intent,1);
                             }
-
-                             */
                         }
                         return false;
                     }
@@ -416,6 +449,11 @@ public class MessageActivity_firebase extends AppCompatActivity {
     //내부 저장소에 저장된 데이터 가져오기
     public String getPreferenceString(String key) {
         SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
+        return pref.getString(key, "");
+    }
+
+    public String getPreferenceStringEnter(String key) {
+        SharedPreferences pref = getSharedPreferences("enter.txt", MODE_PRIVATE);
         return pref.getString(key, "");
     }
 
@@ -580,7 +618,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
             //Log.d("test","videoPath : "+currentVideoPath);
 
             intent.putExtra("id2",pId2);
-            intent.putExtra("photo", data.getData());
+            intent.putExtra("photo", imageUri);
             intent.putExtra("chatRoomId",chatRoomId);
             intent.putExtra("mode",10);
             startActivity(intent);

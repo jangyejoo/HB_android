@@ -6,6 +6,7 @@
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.26979166666666665" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/drawable/ic_launcher_background.xml" value="0.26979166666666665" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/drawable/xml_border.xml" value="0.15185185185185185" />
+        <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/drawable/xml_border2.xml" value="0.2692307692307692" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_auto_login.xml" value="0.2390625" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_buddy.xml" value="0.264" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_chat.xml" value="0.24305555555555555" />
@@ -30,8 +31,10 @@
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_register.xml" value="0.2" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_searchid.xml" value="0.1346153846153846" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_searchpwd.xml" value="0.264" />
+        <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_setting.xml" value="0.4" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_splash.xml" value="0.176" />
-        <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_updateprofile.xml" value="0.264" />
+        <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_update_password.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/activity_updateprofile.xml" value="0.176" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/bottom_menu.xml" value="0.12310030395136778" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/buddy.xml" value="0.12310030395136778" />
         <entry key="..\:/Users/yejoo/AndroidStudioProjects/HealthyBuddy/app/src/main/res/layout/chat.xml" value="0.12310030395136778" />

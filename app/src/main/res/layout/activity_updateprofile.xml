@@ -5,6 +5,7 @@
     android:id="@+id/ScrollView1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     >
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,21 +14,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_gravity="center">
 
         <ImageView
             android:id="@+id/iv_img"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
             android:scaleType="centerCrop"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:weightSum="10">
 
             <EditText
@@ -258,15 +259,8 @@
             android:id="@+id/btn_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="수정"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
-
-        <Button
-            android:id="@+id/btn_logout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="로그아웃"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>
 

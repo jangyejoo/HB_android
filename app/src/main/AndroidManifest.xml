@@ -13,6 +13,13 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SYSTEM_CAMERA" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher_barbell"
@@ -22,6 +29,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HealthyBuddy"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".UpdatePasswordActivity"
+            android:exported="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -30,7 +40,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity
