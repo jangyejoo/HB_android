@@ -35,6 +35,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.healthybuddy.DTO.RegisterDTO;
 import com.example.healthybuddy.DTO.UserModel;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -147,6 +149,12 @@ public class ProfileActivity  extends AppCompatActivity {
         });
 
         // image
+
+        Glide.with(pImg.getContext())
+                .load("https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/test/premium-icon-add-photo-4146794.png")
+                .apply(new RequestOptions().circleCrop())
+                .into(pImg);
+
         pImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -384,21 +392,6 @@ public class ProfileActivity  extends AppCompatActivity {
                 map.put("pDetail",detail);
                 map.put("pOpen",open);
 
-                if(destFile==null){
-                    Toast.makeText(ProfileActivity.this, "프로필 사진을 설정하세요.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Log.d("Test",destFile.getPath());
-                Log.d("Test",String.valueOf(destFile.length()/1024));
-                // pImg
-                RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
-                MultipartBody.Part Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
-
-                //ProfileDTO dto = new ProfileDTO(pId,pNickname.getText().toString(),pGym.getText().toString(),pAge,pHeight,pWeight,pSex,pRoutine,pDetail.getText().toString(),"test",pOpen);
-                Log.d("Test", pId + pNickname.getText().toString() + pGym.getText().toString() + pAge + pHeight + pWeight + pSex+pRoutine+pDetail.getText().toString()+"test"+pOpen);
-
-
                 // 유효성 검사
                 if(pNickname.getText().toString().length()==0){
                     Toast.makeText(ProfileActivity.this, "닉네임을 입력하세요.", Toast.LENGTH_SHORT).show();
@@ -420,37 +413,80 @@ public class ProfileActivity  extends AppCompatActivity {
                     return;
                 }
 
-                // json으로 던져주기
-                //Call<ResponseBody> create = retrofitClient.profile.create(token,dto);
-                Call<ResponseBody> create = retrofitClient.profile.create(token,Bmp,map);
-                //Log.d("Test", dto.toString());
+                if(destFile==null){
+                    //Toast.makeText(ProfileActivity.this, "프로필 사진을 설정하세요.", Toast.LENGTH_SHORT).show();
+                    //return;
+                    Call<ResponseBody> create = retrofitClient.profile.create(token, null, map);
+                    create.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            try{
+                                if(!response.isSuccessful()){
+                                    Log.v("result", "실패");
+                                    Log.d("Test", response.toString());
+                                } else {
+                                    Log.v("Test", "성공");
 
-                create.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        try{
-                            if(!response.isSuccessful()){
-                                Log.v("result", "실패");
-                                Log.d("Test", response.toString());
-                            } else {
-                                Log.v("Test", "성공");
-
-                                Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
-                                Intent intent = null;
-                                intent = new Intent(ProfileActivity.this, MainActivity.class);
-                                startActivity(intent);
+                                    Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
+                                    Intent intent = null;
+                                    intent = new Intent(ProfileActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            } catch(Exception e){
+                                Log.v("Test", "error");
+                                e.printStackTrace();
                             }
-                        } catch(Exception e){
-                            Log.v("Test", "error");
-                            e.printStackTrace();
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.v("Test", "접속실패");
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.v("Test", "접속실패");
+                        }
+                    });
+
+                } else {
+
+                    Log.d("Test", destFile.getPath());
+                    Log.d("Test", String.valueOf(destFile.length() / 1024));
+
+                    // pImg
+                    RequestBody requestBmp = RequestBody.create(MediaType.parse("multipart/form-data"), destFile);
+                    MultipartBody.Part Bmp = MultipartBody.Part.createFormData("pImg", destFile.getName(), requestBmp);
+
+                    Log.d("Test", pId + pNickname.getText().toString() + pGym.getText().toString() + pAge + pHeight + pWeight + pSex + pRoutine + pDetail.getText().toString() + "test" + pOpen);
+
+                    // json으로 던져주기
+                    Call<ResponseBody> create = retrofitClient.profile.create(token, Bmp, map);
+                    create.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            try{
+                                if(!response.isSuccessful()){
+                                    Log.v("result", "실패");
+                                    Log.d("Test", response.toString());
+                                } else {
+                                    Log.v("Test", "성공");
+
+                                    Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
+                                    Intent intent = null;
+                                    intent = new Intent(ProfileActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            } catch(Exception e){
+                                Log.v("Test", "error");
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.v("Test", "접속실패");
+                        }
+                    });
+
+                }
+
+
             }
         });
 

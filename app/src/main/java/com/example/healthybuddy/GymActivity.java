@@ -74,7 +74,8 @@ public class GymActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
         PlacesListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener{
 
         private GoogleMap mMap;
         private Marker currentMarker=null;
@@ -326,6 +327,7 @@ public class GymActivity extends AppCompatActivity
 
             // 마커 클릭에 대한 이벤트 처리
             mMap.setOnMarkerClickListener(this);
+            mMap.setOnInfoWindowClickListener(this);
        
         }
 
@@ -647,14 +649,19 @@ public class GymActivity extends AppCompatActivity
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.d("test", marker.getTitle());
         //Toast.makeText(this, marker.getTitle() + "\n"+marker.getPosition(), Toast.LENGTH_SHORT).show();
+        marker.showInfoWindow();
+        return true;
+    }
+
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
         title = marker.getTitle();
         snippet = marker.getSnippet();
         Intent outIntent = new Intent(getApplicationContext(), ProfileActivity.class);
         outIntent.putExtra("Gym",title + " "+snippet);
         setResult(RESULT_OK, outIntent);
         finish();
-        return true;
     }
-
 }
 

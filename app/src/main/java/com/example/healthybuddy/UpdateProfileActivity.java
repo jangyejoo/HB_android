@@ -493,6 +493,10 @@ public class UpdateProfileActivity  extends AppCompatActivity {
                     return;
                 }
 
+
+                // gym 저장
+                setPreference("gym",pGym.getText().toString());
+
                 // img 바꿀 때랑 안바꿀 때 분기 나누어야 할 듯
                 MultipartBody.Part Bmp;
                 Call<ResponseBody> update;
@@ -545,6 +549,14 @@ public class UpdateProfileActivity  extends AppCompatActivity {
     public String getPreferenceString(String key) {
         SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
         return pref.getString(key, "");
+    }
+
+    //데이터를 내부 저장소에 저장하기
+    public void setPreference(String key, String value) {
+        SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(key, value);
+        editor.apply();
     }
 
     //화면 터치 시 키보드 내려감

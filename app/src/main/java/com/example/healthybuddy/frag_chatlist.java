@@ -50,7 +50,7 @@ import retrofit2.Response;
 
 public class frag_chatlist extends Fragment {
 
-    private String pId, token;
+    private String pId, token, gym;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
     @Nullable
@@ -60,6 +60,8 @@ public class frag_chatlist extends Fragment {
 
         pId = getPreferenceString("id");
         token = "Bearer " + getPreferenceString("token");
+        gym = getPreferenceString("gym");
+        Log.d("test","현재 사용자의 gym : "+gym);
 
         HashMap<String, RequestBody> map = new HashMap<>();
         RequestBody id = RequestBody.create(MediaType.parse("text/plain"), pId);
@@ -161,40 +163,54 @@ public class frag_chatlist extends Fragment {
                         }else {
                             ProfileDTO post = response.body();
 
-                            destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/" + post.getpImg();
-                            destinationUserModel.Nickname = post.getpNickname();
-                            destinationUserModel.id2 = post.getpId();
+                            destinationUserModel.gym = post.getpGym();
 
-                            Glide.with(customViewHolder.itemView.getContext())
-                                    .load(destinationUserModel.img)
-                                    .apply(new RequestOptions().circleCrop())
-                                    .into(customViewHolder.imageView);
-                            customViewHolder.textView_title.setText(destinationUserModel.Nickname);
+                            if(destinationUserModel.gym.equals(gym)){
+                                destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/" + post.getpImg();
+                                destinationUserModel.Nickname = post.getpNickname();
+                                destinationUserModel.id2 = post.getpId();
+                                Glide.with(customViewHolder.itemView.getContext())
+                                        .load(destinationUserModel.img)
+                                        .apply(new RequestOptions().circleCrop())
+                                        .into(customViewHolder.imageView);
+                                customViewHolder.textView_title.setText(destinationUserModel.Nickname);
 
-                            Map<String, ChatModel.Comment> commentMap = new TreeMap<>(Collections.reverseOrder());
-                            commentMap.putAll(chatModels.get(position).comments);
-                            String lastMessageKey = (String) commentMap.keySet().toArray()[0];
-                            customViewHolder.textView_last_message.setText(chatModels.get(position).comments.get(lastMessageKey).message);
+                                Map<String, ChatModel.Comment> commentMap = new TreeMap<>(Collections.reverseOrder());
+                                commentMap.putAll(chatModels.get(position).comments);
+                                String lastMessageKey = (String) commentMap.keySet().toArray()[0];
+                                customViewHolder.textView_last_message.setText(chatModels.get(position).comments.get(lastMessageKey).message);
 
-                            destinationUserModels.add(destinationUserModel);
+                                destinationUserModels.add(destinationUserModel);
 
-                            customViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(view.getContext(), MessageActivity_firebase.class);
-                                    intent.putExtra("id2",destinationUserModel.id2);
+                                customViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Intent intent = new Intent(view.getContext(), MessageActivity_firebase.class);
+                                        intent.putExtra("id2",destinationUserModel.id2);
 
-                                    ActivityOptions activityOptions = ActivityOptions.makeCustomAnimation(view.getContext(),R.anim.fromright, R.anim.toleft);
-                                    startActivity(intent, activityOptions.toBundle());
-                                }
-                            });
+                                        ActivityOptions activityOptions = ActivityOptions.makeCustomAnimation(view.getContext(),R.anim.fromright, R.anim.toleft);
+                                        startActivity(intent, activityOptions.toBundle());
+                                    }
+                                });
 
-                            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                            long unixTime = (long)chatModels.get(position).comments.get(lastMessageKey).timestamp;
-                            Date date = new Date(unixTime);
-                            customViewHolder.textView_timestamp.setText(simpleDateFormat.format(date));
+                                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+                                long unixTime = (long)chatModels.get(position).comments.get(lastMessageKey).timestamp;
+                                Date date = new Date(unixTime);
+                                customViewHolder.textView_timestamp.setText(simpleDateFormat.format(date));
 
+                            } else {
+                                destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/test/user.png";
+                                destinationUserModel.Nickname = "헬스장이 변경되었습니다.";
+                                destinationUserModel.id2 = post.getpId();
+                                Glide.with(customViewHolder.itemView.getContext())
+                                        .load(destinationUserModel.img)
+                                        .apply(new RequestOptions().circleCrop())
+                                        .into(customViewHolder.imageView);
+                                customViewHolder.textView_title.setText(destinationUserModel.Nickname);
 
+                                destinationUserModels.add(destinationUserModel);
+
+                            }
                         }
                     }catch(Exception e){
                         Log.v("Test", "catch"+e.toString());

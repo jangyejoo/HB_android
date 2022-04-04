@@ -6,4 +6,5 @@ public class itemData {
     public String Detail;
     public String Info;
     public String id2;
+    public String gym;
 }
