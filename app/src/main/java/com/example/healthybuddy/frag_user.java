@@ -144,9 +144,6 @@ public class frag_user extends Fragment {
                             TextView gym = (TextView) view.findViewById(R.id.tv_gym);
                             gym.setText(post.getpGym());
 
-                            // gym 저장
-                            setPreference("gym",post.getpGym());
-
                             sex="";
                             height="";
                             weight="";
@@ -210,13 +207,5 @@ public class frag_user extends Fragment {
     public String getPreferenceString(String key) {
         SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt",MODE_PRIVATE);
         return pref.getString(key, "");
-    }
-
-    //데이터를 내부 저장소에 저장하기
-    public void setPreference(String key, String value) {
-        SharedPreferences pref = this.getActivity().getSharedPreferences("token.txt", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString(key, value);
-        editor.apply();
     }
 }

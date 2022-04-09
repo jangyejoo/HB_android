@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.textclassifier.TextLinks;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -38,6 +39,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.healthybuddy.DTO.ChatModel;
+import com.example.healthybuddy.DTO.NotificationModel;
 import com.example.healthybuddy.DTO.ProfileDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
 import com.example.healthybuddy.DTO.itemData;
@@ -50,6 +52,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +65,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -71,7 +76,7 @@ import retrofit2.Response;
 public class MessageActivity_firebase extends AppCompatActivity {
 
     private EditText text;
-    private String mId, token, pId2, chatRoomId, enter;
+    private String mId, token, pId2, chatRoomId, enter, nick;
     private Button btn, btn_friend, btn_accept, btn_plus;
     private RecyclerView recyclerView;
     private itemData destinationUserModel = new itemData();
@@ -101,6 +106,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
         mId = getPreferenceString("id");
         token = "Bearer " + getPreferenceString("token");
         enter = getPreferenceStringEnter(mId);
+        nick = getPreferenceString("nick");
 
         pId2 = getIntent().getStringExtra("id2");
         btn = (Button) findViewById(R.id.message_btn);
@@ -259,8 +265,8 @@ public class MessageActivity_firebase extends AppCompatActivity {
                     FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("comments").push().setValue(comment).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            //sendGcm();
-                            text.setText("");
+                            sendGcm();
+                            //text.setText("");
                         }
                     });
                 }
@@ -445,7 +451,56 @@ public class MessageActivity_firebase extends AppCompatActivity {
         checkChatRoom();
     }
 
+    void sendGcm(){
+        Gson gson = new Gson();
 
+        NotificationModel notificationModel = new NotificationModel();
+        FirebaseDatabase.getInstance().getReference().child("users").child(pId2).child("pushToken").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                notificationModel.to = snapshot.getValue(String.class);
+                Log.d("test","to : "+notificationModel.to);
+                //notificationModel.notification.title = nick;
+                //notificationModel.notification.text = text.getText().toString();
+                notificationModel.data.title = nick;
+                notificationModel.data.text = text.getText().toString();
+                //Log.d("test","text : "+notificationModel.notification.text);
+                Log.d("test","text : "+text.getText().toString());
+                text.setText("");
+
+                RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf8"), gson.toJson(notificationModel));
+                Request request = new Request.Builder()
+                        .header("Content-Type", "application/json")
+                        .addHeader("Authorization", "key=AAAAyNC2qPo:APA91bErZaIwHlMjIsFWHE524WJD4WlHjg4ETohEnLWk62U_nX8HGDrj9zw3p5VBKSc7fHHjeZTf8lX796zfI-ZfNvYFm7PR4a14RFMMwfBNrAdrfLvzTBHqYWX9FnRJk2agk-DUlojR")
+                        .url("https://fcm.googleapis.com/fcm/send")
+                        .post(requestBody)
+                        .build();
+
+                OkHttpClient okHttpClient = new OkHttpClient();
+                okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+                    @Override
+                    public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
+                        Log.d("test","error : "+e.getMessage());
+                        Log.d("test","call1 : "+call.toString());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull okhttp3.Call call, @NonNull okhttp3.Response response) throws IOException {
+                        Log.d("test","call2 : "+call.toString());
+                        Log.d("test","response : "+response.toString());
+                        Log.d("test", "response2 : "+response.body().string());
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
     //내부 저장소에 저장된 데이터 가져오기
     public String getPreferenceString(String key) {
         SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
@@ -768,7 +823,8 @@ public class MessageActivity_firebase extends AppCompatActivity {
             }
 
             if(comments.get(position).pId.equals(mId)){
-                if(position==comments.size()-1 ||!time.equals(pos_time)) {
+                // 바로 다음 메세지가 상대방이 보낸 거면 timestamp 출력
+                if((position<comments.size()-1 && !comments.get(position+1).pId.equals(mId)) || position==comments.size()-1 ||!time.equals(pos_time)) {
                     messageViewHolder.textview_name.setVisibility(View.GONE);
                     messageViewHolder.textView_message.setText(comments.get(position).message);
                     messageViewHolder.textView_message.setBackgroundResource(R.drawable.right);
@@ -789,9 +845,10 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 }
                 messageViewHolder.imageview_message.setBackgroundResource(R.drawable.right);
             } else {
-                if(position==comments.size()-1){
+                // 상대방일 때
+                if( ( position<comments.size()-1 && comments.get(position+1).pId.equals(mId)) || position == comments.size()-1 ){
                     // 마지막 메세지인데 그 전에 보낸거랑 시간이 다를 때
-                    if(!time.equals(pre_time)){
+                    if(( position > 0 && comments.get(position-1).pId.equals(mId)) || !time.equals(pre_time)){
                         // 프로필과 닉네임 출력
                         Glide.with(holder.itemView.getContext())
                                 .load(destinationUserModel.img)
@@ -799,12 +856,10 @@ public class MessageActivity_firebase extends AppCompatActivity {
                                 .into(messageViewHolder.imageview_profile);
                         messageViewHolder.textview_name.setText(destinationUserModel.Nickname);
                         messageViewHolder.linearlayout_destination.setVisibility(View.VISIBLE);
-
                     } else {
                         // 프로필과 닉네임 생략, 타임 스탬프는 출력
                         messageViewHolder.textview_name.setVisibility(View.GONE);
                         messageViewHolder.linearlayout_destination.setVisibility(View.INVISIBLE);
-
                     }
                     messageViewHolder.textView_message.setBackgroundResource(R.drawable.left);
                     messageViewHolder.textView_message.setText(comments.get(position).message);
@@ -813,13 +868,12 @@ public class MessageActivity_firebase extends AppCompatActivity {
                     setReadCounter(position,messageViewHolder.textview_readCounterRight);
                 } else {
                     // 마지막 메세지가 아닐 때
-
                     // 바로 전 메세지랑 시간이 다를 때 프로필과 닉네임 출력 근데 또 두 가지로 나뉨
                     // 그 다음 메세지랑 시간이 같을 때는 타임 스탬프 생략, 다를 때는 타임 스탬프 출력
 
                     // 바로 전 메세지랑 시간이 같을 때는 프로필과 닉네임 생략 근데 또 두가지로 나뉨
                     // 그 다음 메세지랑 시간이 같을 때는 타임 스탬프 생략, 다를 때는 타임 스탬프 출력
-                    if(!time.equals(pre_time)){
+                    if(( position > 0 && comments.get(position-1).pId.equals(mId)) || !time.equals(pre_time)){
                         if(!time.equals(pos_time)) {
                             Glide.with(holder.itemView.getContext())
                                     .load(destinationUserModel.img)
@@ -868,7 +922,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         }
                     }
                 }
-                messageViewHolder.imageview_message.setBackgroundResource(R.drawable.left);
+                    messageViewHolder.imageview_message.setBackgroundResource(R.drawable.left);
             }
 
             messageViewHolder.imageview_message.setOnClickListener(new View.OnClickListener() {
@@ -969,5 +1023,13 @@ public class MessageActivity_firebase extends AppCompatActivity {
         }
         finish();
         overridePendingTransition(R.anim.fromleft, R.anim.toright);
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        if(databaseReference!=null && valueEventListener!=null){
+            Log.d("test","대체 뭐냐구");
+            databaseReference.removeEventListener(valueEventListener);
+        }
     }
 }

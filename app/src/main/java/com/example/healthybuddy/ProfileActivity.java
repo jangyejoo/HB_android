@@ -427,6 +427,10 @@ public class ProfileActivity  extends AppCompatActivity {
                                 } else {
                                     Log.v("Test", "성공");
 
+                                    // gym, nick 저장
+                                    setPreference("gym",pGym.getText().toString());
+                                    setPreference("nick",pNickname.getText().toString());
+
                                     Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
                                     Intent intent = null;
                                     intent = new Intent(ProfileActivity.this, MainActivity.class);
@@ -467,6 +471,10 @@ public class ProfileActivity  extends AppCompatActivity {
                                 } else {
                                     Log.v("Test", "성공");
 
+                                    // gym, nick 저장
+                                    setPreference("gym",pGym.getText().toString());
+                                    setPreference("nick",pNickname.getText().toString());
+
                                     Toast.makeText(ProfileActivity.this,"프로필 설정 완료", Toast.LENGTH_SHORT).show();
                                     Intent intent = null;
                                     intent = new Intent(ProfileActivity.this, MainActivity.class);
@@ -496,6 +504,14 @@ public class ProfileActivity  extends AppCompatActivity {
     public String getPreferenceString(String key) {
         SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
         return pref.getString(key, "");
+    }
+
+    //데이터를 내부 저장소에 저장하기
+    public void setPreference(String key, String value) {
+        SharedPreferences pref = getSharedPreferences("token.txt", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(key, value);
+        editor.apply();
     }
 
     //화면 터치 시 키보드 내려감

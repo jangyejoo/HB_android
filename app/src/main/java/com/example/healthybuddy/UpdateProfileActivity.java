@@ -493,9 +493,9 @@ public class UpdateProfileActivity  extends AppCompatActivity {
                     return;
                 }
 
-
-                // gym 저장
+                // gym, nick 저장
                 setPreference("gym",pGym.getText().toString());
+                setPreference("nick",pNickname.getText().toString());
 
                 // img 바꿀 때랑 안바꿀 때 분기 나누어야 할 듯
                 MultipartBody.Part Bmp;

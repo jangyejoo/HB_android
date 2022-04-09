@@ -1,5 +1,6 @@
 package com.example.healthybuddy;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -10,6 +11,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        passPushTokenToServer();
     }
 
     //프래그먼트 교체가 일어나는 실행문
@@ -92,4 +99,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.main_frame, fragment).commit();      // Fragment로 사용할 MainActivity내의 layout공간을 선택합니다.
     }
 
+    void passPushTokenToServer(){
+        String id = getPreferenceString("id");
+        String token = FirebaseInstanceId.getInstance().getToken();
+        Map<String, Object> map = new HashMap<>();
+        map.put("pushToken",token);
+
+        FirebaseDatabase.getInstance().getReference().child("users").child(id).updateChildren(map);
+    }
+
+    public String getPreferenceString(String key) {
+        SharedPreferences pref = getSharedPreferences("token.txt",MODE_PRIVATE);
+        return pref.getString(key, "");
+    }
 }
