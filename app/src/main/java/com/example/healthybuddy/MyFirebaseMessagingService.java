@@ -24,12 +24,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             String title = remoteMessage.getData().get("title").toString();
             String text = remoteMessage.getData().get("text").toString();
-            sendNotification(title,text);
+            String id = remoteMessage.getData().get("id").toString();
+            sendNotification(title,text,id);
         }
     }
 
-    private void sendNotification(String title, String text) {
-        Intent intent = new Intent(this, MainActivity.class);
+    private void sendNotification(String title, String text, String id) {
+        Intent intent = new Intent(this, MessageActivity_firebase.class);
+        intent.putExtra("id2",id);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);

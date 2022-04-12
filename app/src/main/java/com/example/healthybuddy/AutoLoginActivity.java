@@ -109,6 +109,7 @@ public class AutoLoginActivity extends AppCompatActivity {
                                         startActivity(intent);
                                     }
                                 })
+                                .setCancelable(false)
                                 .create()
                                 .show();
                     } else {
@@ -131,6 +132,15 @@ public class AutoLoginActivity extends AppCompatActivity {
                         .show();
             }
         });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        overridePendingTransition(0,0);
+        Intent intent = getIntent();
+        startActivity(intent);
+        overridePendingTransition(0,0);
     }
 
     //내부 저장소에 저장된 데이터 가져오기

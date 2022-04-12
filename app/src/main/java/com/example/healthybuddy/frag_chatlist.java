@@ -6,6 +6,7 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.renderscript.Int4;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -52,6 +56,10 @@ public class frag_chatlist extends Fragment {
 
     private String pId, token, gym;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+    private List<itemData> destinationUserModels = new ArrayList<>();
+    private ChatRecyclerViewAdapter chatRecyclerViewAdapter;
+    private int alreadyRead;
+    private int chatSize;
 
     @Nullable
     @Override
@@ -92,18 +100,29 @@ public class frag_chatlist extends Fragment {
         });
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.chatlist_recyclerview);
-        recyclerView.setAdapter(new ChatRecyclerViewAdapter());
+        chatRecyclerViewAdapter = new ChatRecyclerViewAdapter();
+        recyclerView.setAdapter(chatRecyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
 
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("test","resume");
+        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.chatlist_recyclerview);
+        chatRecyclerViewAdapter = new ChatRecyclerViewAdapter();
+        recyclerView.setAdapter(chatRecyclerViewAdapter);
+        chatRecyclerViewAdapter.notifyDataSetChanged();
+    }
+
     class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         private List<ChatModel> chatModels = new ArrayList<>();
+        private List<ChatModel> sort_before = new ArrayList<>();
         //private String uid;
         private ArrayList<String> destinationUsers = new ArrayList<>();
-        private List<itemData> destinationUserModels = new ArrayList<>();
 
         public ChatRecyclerViewAdapter(){
             FirebaseDatabase.getInstance().getReference().child("chatrooms").orderByChild("users/"+pId).equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -134,9 +153,12 @@ public class frag_chatlist extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             CustomViewHolder customViewHolder = (CustomViewHolder)holder;
+            Log.d("test","onBindViewHolder");
 
             String destinationId = null;
             itemData destinationUserModel = new itemData();
+
+            Collections.sort(chatModels);
 
             // 챗방에 있는 유저를 일일히 체크
             for(String user : chatModels.get(position).users.keySet()){
@@ -146,85 +168,129 @@ public class frag_chatlist extends Fragment {
                 }
             }
 
-            RetrofitClient retrofitClient = new RetrofitClient();
+            // 안읽은 메시지 개수 세기?
+            // 한 채팅방의 comments 개수 - 내가 읽은 comments 개수
+            // chatModels.get(position).comments.size() -> 한 채팅방의 comments 개수
+            // chatModels.get(position).comments의 readUsers = "my Id" 를 다 검색해서 나온 개수
+            String key = (String) chatModels.get(position).key.get("key");
+            int [] alreadyRead = new int[chatModels.size()];
 
-            HashMap<String, RequestBody> destinationUser = new HashMap<>();
-            RequestBody Id = RequestBody.create(MediaType.parse("text/plain"), pId);
-            RequestBody Id2 = RequestBody.create(MediaType.parse("text/plain"), destinationId);
-            destinationUser.put("pId", Id2);
-
-            Call<ProfileDTO> profile = retrofitClient.profile.profile(token, destinationUser);
-            profile.enqueue(new Callback<ProfileDTO>() {
+            String finalDestinationId = destinationId;
+            FirebaseDatabase.getInstance().getReference().child("chatrooms").child(key).child("comments").orderByChild("readUsers/"+pId).equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onResponse(Call<ProfileDTO> call, Response<ProfileDTO> response) {
-                    try{
-                        if(!response.isSuccessful()){
-                            Log.d("test","뭔가 잘못됐다");
-                        }else {
-                            ProfileDTO post = response.body();
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    alreadyRead[position] = 0;
+                    Log.d("test","alreadyRead == 0");
+                    for(DataSnapshot item : snapshot.getChildren()) {
+                        Log.d("test", "readUsers : "+item.getKey());
+                        Log.d("test","alreadyRead++");
+                        alreadyRead[position]++;
+                        Log.d("test","현재 alreadyRead : "+alreadyRead[position]);
+                    }
 
-                            destinationUserModel.gym = post.getpGym();
+                    RetrofitClient retrofitClient = new RetrofitClient();
 
-                            if(destinationUserModel.gym.equals(gym)){
-                                destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/" + post.getpImg();
-                                destinationUserModel.Nickname = post.getpNickname();
-                                destinationUserModel.id2 = post.getpId();
-                                Glide.with(customViewHolder.itemView.getContext())
-                                        .load(destinationUserModel.img)
-                                        .apply(new RequestOptions().circleCrop())
-                                        .into(customViewHolder.imageView);
-                                customViewHolder.textView_title.setText(destinationUserModel.Nickname);
+                    HashMap<String, RequestBody> destinationUser = new HashMap<>();
+                    RequestBody Id = RequestBody.create(MediaType.parse("text/plain"), pId);
+                    RequestBody Id2 = RequestBody.create(MediaType.parse("text/plain"), finalDestinationId);
+                    destinationUser.put("pId", Id2);
 
-                                Map<String, ChatModel.Comment> commentMap = new TreeMap<>(Collections.reverseOrder());
-                                commentMap.putAll(chatModels.get(position).comments);
-                                String lastMessageKey = (String) commentMap.keySet().toArray()[0];
-                                customViewHolder.textView_last_message.setText(chatModels.get(position).comments.get(lastMessageKey).message);
+                    Call<ProfileDTO> profile = retrofitClient.profile.profile(token, destinationUser);
+                    profile.enqueue(new Callback<ProfileDTO>() {
+                        @Override
+                        public void onResponse(Call<ProfileDTO> call, Response<ProfileDTO> response) {
+                            try{
+                                if(!response.isSuccessful()){
+                                    Log.d("test","뭔가 잘못됐다");
+                                }else {
+                                    Log.d("test","onBindViewHolder_profile_start");
+                                    ProfileDTO post = response.body();
 
-                                destinationUserModels.add(destinationUserModel);
+                                    destinationUserModel.gym = post.getpGym();
 
-                                customViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Intent intent = new Intent(view.getContext(), MessageActivity_firebase.class);
-                                        intent.putExtra("id2",destinationUserModel.id2);
+                                    if(destinationUserModel.gym.equals(gym)){
+                                        destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/" + post.getpImg();
+                                        destinationUserModel.Nickname = post.getpNickname();
+                                        destinationUserModel.id2 = post.getpId();
+                                        Glide.with(customViewHolder.itemView.getContext())
+                                                .load(destinationUserModel.img)
+                                                .apply(new RequestOptions().circleCrop())
+                                                .into(customViewHolder.imageView);
+                                        customViewHolder.textView_title.setText(destinationUserModel.Nickname);
 
-                                        ActivityOptions activityOptions = ActivityOptions.makeCustomAnimation(view.getContext(),R.anim.fromright, R.anim.toleft);
-                                        startActivity(intent, activityOptions.toBundle());
+                                        if (chatModels.get(position).comments.size()-alreadyRead[position]!=0){
+                                            if (chatModels.get(position).comments.size()-alreadyRead[position] > 10) {
+                                                customViewHolder.textView_newmessage.setVisibility(View.VISIBLE);
+                                                customViewHolder.textView_newmessage.setText("10+");
+                                            } else {
+                                                customViewHolder.textView_newmessage.setVisibility(View.VISIBLE);
+                                                customViewHolder.textView_newmessage.setText(String.valueOf(chatModels.get(position).comments.size() - alreadyRead[position]));
+                                            }
+                                        }
+                                        Log.d("test","chatSize : "+chatModels.get(position).comments.size());
+                                        Log.d("test","alreadyRead : "+alreadyRead[position]);
+
+                                        Map<String, ChatModel.Comment> commentMap = new TreeMap<>(Collections.reverseOrder());
+                                        commentMap.putAll(chatModels.get(position).comments);
+                                        String lastMessageKey = (String) commentMap.keySet().toArray()[0];
+                                        customViewHolder.textView_last_message.setText(chatModels.get(position).comments.get(lastMessageKey).message);
+
+                                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+                                        long unixTime = (long)chatModels.get(position).comments.get(lastMessageKey).timestamp;
+                                        Date date = new Date(unixTime);
+                                        customViewHolder.textView_timestamp.setText(simpleDateFormat.format(date));
+
+                                        //destinationUserModels.add(destinationUserModel);
+                                        //Collections.sort(destinationUserModels);
+
+                                        customViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                Intent intent = new Intent(view.getContext(), MessageActivity_firebase.class);
+                                                intent.putExtra("id2",destinationUserModel.id2);
+
+                                                ActivityOptions activityOptions = ActivityOptions.makeCustomAnimation(view.getContext(),R.anim.fromright, R.anim.toleft);
+                                                startActivity(intent, activityOptions.toBundle());
+                                            }
+                                        });
+
+                                    } else {
+                                        destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/test/user.png";
+                                        destinationUserModel.Nickname = "헬스장이 변경되었습니다.";
+                                        destinationUserModel.id2 = post.getpId();
+                                        Glide.with(customViewHolder.itemView.getContext())
+                                                .load(destinationUserModel.img)
+                                                .apply(new RequestOptions().circleCrop())
+                                                .into(customViewHolder.imageView);
+                                        customViewHolder.textView_title.setText(destinationUserModel.Nickname);
+
+                                        //destinationUserModels.add(destinationUserModel);
+
                                     }
-                                });
-
-                                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                                long unixTime = (long)chatModels.get(position).comments.get(lastMessageKey).timestamp;
-                                Date date = new Date(unixTime);
-                                customViewHolder.textView_timestamp.setText(simpleDateFormat.format(date));
-
-                            } else {
-                                destinationUserModel.img= "https://elasticbeanstalk-ap-northeast-2-355785572273.s3.ap-northeast-2.amazonaws.com/test/user.png";
-                                destinationUserModel.Nickname = "헬스장이 변경되었습니다.";
-                                destinationUserModel.id2 = post.getpId();
-                                Glide.with(customViewHolder.itemView.getContext())
-                                        .load(destinationUserModel.img)
-                                        .apply(new RequestOptions().circleCrop())
-                                        .into(customViewHolder.imageView);
-                                customViewHolder.textView_title.setText(destinationUserModel.Nickname);
-
-                                destinationUserModels.add(destinationUserModel);
-
+                                }
+                            }catch(Exception e){
+                                Log.v("Test", "catch"+e.toString());
+                                e.printStackTrace();
                             }
                         }
-                    }catch(Exception e){
-                        Log.v("Test", "catch"+e.toString());
-                        e.printStackTrace();
-                    }
+
+                        @Override
+                        public void onFailure(Call<ProfileDTO> call, Throwable t) {
+                            Log.v("test","failure"+t.toString());
+                        }
+                    });
+
+
                 }
 
                 @Override
-                public void onFailure(Call<ProfileDTO> call, Throwable t) {
-                    Log.v("test","failure"+t.toString());
+                public void onCancelled(@NonNull DatabaseError error) {
+
                 }
             });
 
 
+            Log.d("test","onBindViewHolder_profile_end");
 
         }
 
@@ -236,7 +302,7 @@ public class frag_chatlist extends Fragment {
         private class CustomViewHolder extends RecyclerView.ViewHolder {
 
             public ImageView imageView;
-            public TextView textView_title, textView_last_message, textView_timestamp;
+            public TextView textView_title, textView_last_message, textView_timestamp, textView_newmessage;
 
             public CustomViewHolder(View view) {
                 super(view);
@@ -245,6 +311,7 @@ public class frag_chatlist extends Fragment {
                 textView_title = (TextView)view.findViewById(R.id.chatlistitem_textview_title);
                 textView_last_message = (TextView) view.findViewById(R.id.chatlistitem_textview_lastMessage);
                 textView_timestamp = (TextView) view.findViewById(R.id.chatlistitem_textview_timestamp);
+                textView_newmessage = (TextView) view.findViewById(R.id.chatlistitem_textview_newmessage);
             }
         }
 

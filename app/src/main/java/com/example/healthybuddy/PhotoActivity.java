@@ -137,8 +137,8 @@ public class PhotoActivity extends AppCompatActivity {
                                         Intent intent = new Intent(PhotoActivity.this, MessageActivity_firebase.class);
                                         intent.putExtra("chatRoomId",chatRoomId);
                                         intent.putExtra("id2",pId2);
-
                                         finish();
+                                        //startActivity(intent);
                                     }
                                 });
                             }

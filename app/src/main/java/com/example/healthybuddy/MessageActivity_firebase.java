@@ -10,6 +10,7 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -98,6 +99,8 @@ public class MessageActivity_firebase extends AppCompatActivity {
 
     private Boolean noRoom = false;
 
+    private RecyclerViewAdapter recyclerViewAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,6 +178,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
         ChatModel chatModel = new ChatModel();
         chatModel.users.put(mId, true);
         chatModel.users.put(pId2, true);
+        chatModel.recentTime.put("recentTime", ServerValue.TIMESTAMP);
 
         checkChatRoom2(new SimpleCallback<Integer>() {
             @Override
@@ -243,10 +247,15 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 chatModel.users.put(mId, true);
                 chatModel.users.put(pId2, true);
 
+                Object send_time = ServerValue.TIMESTAMP;
+
                 ChatModel.Comment comment = new ChatModel.Comment();
                 comment.pId = mId;
                 comment.message = text.getText().toString();
-                comment.timestamp = ServerValue.TIMESTAMP;
+                comment.timestamp = send_time;
+
+                chatModel.recentTime.put("recentTime", send_time);
+                chatModel.key.put("key", chatRoomId);
 
                 if(text.getText().toString().length()==0){
                     return;
@@ -267,6 +276,20 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             sendGcm();
                             //text.setText("");
+                        }
+                    });
+
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("recentTime").updateChildren(chatModel.recentTime).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Log.d("test","됐냐");
+                        }
+                    });
+
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("key").updateChildren(chatModel.key).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Log.d("test","됐냐");
                         }
                     });
                 }
@@ -451,6 +474,13 @@ public class MessageActivity_firebase extends AppCompatActivity {
         checkChatRoom();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("test", "onRestart");
+        recyclerViewAdapter.getMessageList();
+    }
+
     void sendGcm(){
         Gson gson = new Gson();
 
@@ -463,7 +493,13 @@ public class MessageActivity_firebase extends AppCompatActivity {
                 //notificationModel.notification.title = nick;
                 //notificationModel.notification.text = text.getText().toString();
                 notificationModel.data.title = nick;
-                notificationModel.data.text = text.getText().toString();
+                notificationModel.data.id = pId2;
+                if(text.getText().toString()!=null){
+                    notificationModel.data.text = text.getText().toString();
+                } else {
+                    notificationModel.data.text = "사진, 비디오";
+                }
+
                 //Log.d("test","text : "+notificationModel.notification.text);
                 Log.d("test","text : "+text.getText().toString());
                 text.setText("");
@@ -523,7 +559,8 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         Log.d("test","chatRoomId2 : "+chatRoomId);
                         btn.setEnabled(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(MessageActivity_firebase.this));
-                        recyclerView.setAdapter(new RecyclerViewAdapter());
+                        recyclerViewAdapter = new RecyclerViewAdapter();
+                        recyclerView.setAdapter(recyclerViewAdapter);
                     }
                 }
             }

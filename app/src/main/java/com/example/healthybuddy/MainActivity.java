@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         String id = getPreferenceString("id");
         String token = FirebaseInstanceId.getInstance().getToken();
         Map<String, Object> map = new HashMap<>();
-        map.put("pushToken",token);
+        map.put("pushToken",token+id);
 
         FirebaseDatabase.getInstance().getReference().child("users").child(id).updateChildren(map);
     }
