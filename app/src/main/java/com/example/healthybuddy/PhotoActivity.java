@@ -129,6 +129,11 @@ public class PhotoActivity extends AppCompatActivity {
                                 comment.pId = mId;
                                 comment.timestamp = ServerValue.TIMESTAMP;
                                 comment.imgUrl = imageUrl;
+                                if (type.equals("images")){
+                                    comment.message = "사진";
+                                } else {
+                                    comment.message = "동영상";
+                                }
 
                                 // 채팅방에 image uri 저장
                                 FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("comments").push().setValue(comment).addOnCompleteListener(new OnCompleteListener<Void>() {

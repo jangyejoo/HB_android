@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="370dp"
+    android:layout_height="230dp"
+    tools:context=".CalendarActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/calendaractivity_textview_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text = "일정 만들기"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+
+    <EditText
+        android:id="@+id/calendaractivity_edittext_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="일정 제목"
+        android:textSize="20dp"
+        android:padding="10dp"
+        />
+
+    <LinearLayout
+        android:id="@+id/calendaractivity_linearlayout_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/calendaractivity_textview_start"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text = "시작"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:layout_weight="0.5"
+            />
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_start_day"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            />
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_start_ampm"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"/>
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_start_hour"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"/>
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_start_min"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"/>
+
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/calendaractivity_linearlayout_end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/calendaractivity_textview_end"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text = "종료"
+            android:padding="10dp"
+            android:textStyle="bold"
+            />
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_end_day"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            />
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_end_ampm"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@null"/>
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_end_hour"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            />
+
+        <Spinner
+            android:id="@+id/calendaractivity_spinner_end_min"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@null"/>
+
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/calendaractivity_button_send"
+        android:text="완료"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"/>
+
+
+
+</LinearLayout>

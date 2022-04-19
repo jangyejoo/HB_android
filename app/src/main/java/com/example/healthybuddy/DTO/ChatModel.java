@@ -11,6 +11,7 @@ public class ChatModel implements Comparable<ChatModel> {
     public Map<String, Comment> comments = new HashMap<>();
     public Map<String, Object> recentTime = new HashMap<>();
     public Map<String, Object> key = new HashMap<>();
+    public Map<String, Object> calendar = new HashMap<>();
 
     @Override
     public int compareTo(ChatModel chatModel) {
@@ -30,4 +31,5 @@ public class ChatModel implements Comparable<ChatModel> {
         public Map<String, Object> readUsers = new HashMap<>();
         public String imgUrl;
     }
+
 }

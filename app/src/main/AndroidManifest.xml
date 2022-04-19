@@ -30,6 +30,10 @@
         android:theme="@style/Theme.HealthyBuddy"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".CalendarActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"
+            android:exported="true" />
+        <activity
             android:name=".UpdatePasswordActivity"
             android:exported="true" />
 
@@ -113,6 +117,7 @@
             android:name=".UpdateProfileActivity"
             android:label="UpdateProfileActivity"
             android:windowSoftInputMode="adjustPan" />
+
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false">

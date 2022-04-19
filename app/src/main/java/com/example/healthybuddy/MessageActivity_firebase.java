@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +83,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
     private Button btn, btn_friend, btn_accept, btn_plus;
     private RecyclerView recyclerView;
     private itemData destinationUserModel = new itemData();
+    private LinearLayout title, time;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
     private SimpleDateFormat hour_min = new SimpleDateFormat("a HH:mm");
@@ -101,10 +104,19 @@ public class MessageActivity_firebase extends AppCompatActivity {
 
     private RecyclerViewAdapter recyclerViewAdapter;
 
+    private PopupMenu popupMenu;
+    private int alreadyResult;
+
+    private String cal_title, start, end;
+    private TextView tv_title, tv_time;
+
+    public static Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message_firebase);
+        context = this;
 
         mId = getPreferenceString("id");
         token = "Bearer " + getPreferenceString("token");
@@ -118,6 +130,10 @@ public class MessageActivity_firebase extends AppCompatActivity {
         btn_plus = (Button)findViewById(R.id.message_btn_plus);
         text = (EditText) findViewById(R.id.message_editText);
         recyclerView = (RecyclerView)findViewById(R.id.message_recyclerview);
+        title = (LinearLayout) findViewById(R.id.message_linearlayout_title);
+        time = (LinearLayout) findViewById(R.id.message_linearlayout_time);
+        tv_title = (TextView) findViewById(R.id.message_textview_title);
+        tv_time = (TextView) findViewById(R.id.message_textview_time);
 
         RetrofitClient retrofitClient = new RetrofitClient();
 
@@ -187,6 +203,39 @@ public class MessageActivity_firebase extends AppCompatActivity {
                     // 찾는 방이 있을 때
                     noRoom = true;
                     Log.d("test","방이 있어");
+
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("calendar").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                title.setVisibility(View.GONE);
+                            }
+
+                            for(DataSnapshot item : snapshot.getChildren()) {
+                                Log.d("test","item :"+item.getValue());
+                                Log.d("test","key : "+item.getKey());
+                                if (item.getKey().equals("title")){
+                                    cal_title = String.valueOf(item.getValue());
+                                    Log.d("test","title : "+cal_title);
+                                } else if (item.getKey().equals("start")){
+                                    start = String.valueOf(item.getValue());
+                                    Log.d("test","start : "+start);
+                                } else {
+                                    end = String.valueOf(item.getValue());
+                                    Log.d("test","end : "+end);
+
+                                }
+                            }
+                            tv_title.setText(cal_title);
+                            tv_time.setText(start+"~"+end);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
                 } else if (data==0) {
                     // 방이 아예 없을 때
                     Log.d("test", "방이 아예 없어");
@@ -317,6 +366,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         // 이미 친구가 되어있을 때
                         btn_accept.setEnabled(false);
                         btn_friend.setEnabled(false);
+                        Log.d("test","healthy buddy");
                         btn_accept.setText("Healthy Buddy");
                     } else if (res.equals("0")){
                         // 친구는 아닌데 요청은 왔을 때
@@ -419,7 +469,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // 사진, 동영상 첨부, 일정 잡기 메뉴로
-                final PopupMenu popupMenu = new PopupMenu(getApplicationContext(),view);
+                popupMenu = new PopupMenu(getApplicationContext(),view);
                 getMenuInflater().inflate(R.menu.popup,popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -463,6 +513,21 @@ public class MessageActivity_firebase extends AppCompatActivity {
                                 intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY,1);
                                 startActivityForResult(intent,1);
                             }
+                        } else if (menuItem.getItemId()==R.id.action_menu4){
+                            if (alreadyResult == 0){
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MessageActivity_firebase.this);
+                                builder.setTitle("알림")
+                                        .setMessage("권한이 없습니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
+                            } else {
+                                // 기능
+                                Log.d("test","일정 공유");
+                                Intent intent = new Intent(MessageActivity_firebase.this, CalendarActivity.class);
+                                intent.putExtra("chatRoomId",chatRoomId);
+                                startActivity(intent);
+                            }
                         }
                         return false;
                     }
@@ -471,14 +536,94 @@ public class MessageActivity_firebase extends AppCompatActivity {
             }
         });
 
+        title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(time.getVisibility() == View.VISIBLE) {
+                    time.setVisibility(View.GONE);
+                } else {
+                    time.setVisibility(View.VISIBLE);
+                }
+                title.animate().setDuration(200).rotation(0f);
+            }
+        });
+
         checkChatRoom();
     }
 
     @Override
-    protected void onRestart() {
+    public void onRestart() {
         super.onRestart();
         Log.d("test", "onRestart");
         recyclerViewAdapter.getMessageList();
+
+        ChatModel chatModel = new ChatModel();
+        chatModel.users.put(mId, true);
+        chatModel.users.put(pId2, true);
+        chatModel.recentTime.put("recentTime", ServerValue.TIMESTAMP);
+
+        checkChatRoom2(new SimpleCallback<Integer>() {
+            @Override
+            public void callback(Integer data) {
+                if(data==1){
+                    // 찾는 방이 있을 때
+                    noRoom = true;
+                    Log.d("test","방이 있어");
+
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").child(chatRoomId).child("calendar").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                title.setVisibility(View.GONE);
+                            }
+
+                            for(DataSnapshot item : snapshot.getChildren()) {
+                                Log.d("test","item :"+item.getValue());
+                                Log.d("test","key : "+item.getKey());
+                                if (item.getKey().equals("title")){
+                                    cal_title = String.valueOf(item.getValue());
+                                    Log.d("test","title : "+cal_title);
+                                } else if (item.getKey().equals("start")){
+                                    start = String.valueOf(item.getValue());
+                                    Log.d("test","start : "+start);
+                                } else {
+                                    end = String.valueOf(item.getValue());
+                                    Log.d("test","end : "+end);
+
+                                }
+                            }
+                            tv_title.setText(cal_title);
+                            tv_time.setText(start+"~"+end);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                } else if (data==0) {
+                    // 방이 아예 없을 때
+                    Log.d("test", "방이 아예 없어");
+                } else {
+                    // 찾는 방이 없을 때
+                    noRoom = false;
+                    Log.d("test", "방이 없어");
+                }
+
+                if(!noRoom){
+                    btn.setEnabled(false);
+                    Log.d("test","대체 이게 왜");
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").push().setValue(chatModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d("test","대체 이게 왜2");
+                            checkChatRoom();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     void sendGcm(){
@@ -625,15 +770,21 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         Log.v("result", "이거 안 된 거 맞냐");
                         Log.d("Test", response.toString());
                         btn_friend.setEnabled(true);
+                        alreadyResult = 0;
+                        title.setVisibility(View.GONE);
                     } else if(res.equals("0")){
                         // 내가 보낸 친구요청이 있을 때
                         Log.v("Test", "이거 된 거 맞냐");
                         Log.d("Test", "내용"+response.body().string());
                         btn_friend.setEnabled(false);
                         btn_friend.setText("친구요청보냄");
+                        alreadyResult = 0;
+                        title.setVisibility(View.GONE);
                     } else {
                         Log.v("Test", "너네 이미 친구");
                         Log.d("Test", "내용2" + res);
+                        alreadyResult = 1;
+                        btn_accept.setText("Healthy Buddy");
                     }
                 } catch(Exception e){
                     Log.v("Test", "error");

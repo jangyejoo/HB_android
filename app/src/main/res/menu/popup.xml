@@ -9,5 +9,8 @@
     <item
         android:id="@+id/action_menu3"
         android:title="동영상촬영" />
+    <item
+        android:id="@+id/action_menu4"
+        android:title="캘린더" />
 
 </menu>

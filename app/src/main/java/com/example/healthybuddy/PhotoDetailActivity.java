@@ -92,9 +92,13 @@ public class PhotoDetailActivity extends AppCompatActivity {
             }
 
             video.setVideoURI(Uri.parse(url));
+            Log.d("test","videoUrl : "+String.valueOf(url));
+            Log.d("test","동영상 왜 시작 안해요.");
             video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
+                    Log.d("test","동영상 시작이어요.");
+                    video.setBackgroundDrawable(null);
                     mediaPlayer.start();
                 }
             });
