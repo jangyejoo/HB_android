@@ -366,6 +366,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         // 이미 친구가 되어있을 때
                         btn_accept.setEnabled(false);
                         btn_friend.setEnabled(false);
+                        alreadyResult=1;
                         Log.d("test","healthy buddy");
                         btn_accept.setText("Healthy Buddy");
                     } else if (res.equals("0")){
@@ -373,6 +374,7 @@ public class MessageActivity_firebase extends AppCompatActivity {
                         Log.v("test","이게 아닌데?");
                         btn_friend.setEnabled(false);
                         btn_accept.setEnabled(true);
+                        alreadyResult=1;
                     } else {
                         alreadyFriend(already);
                     }

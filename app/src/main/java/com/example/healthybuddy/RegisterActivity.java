@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.example.healthybuddy.DTO.EmailDTO;
 import com.example.healthybuddy.DTO.IdDTO;
 import com.example.healthybuddy.DTO.RegisterDTO;
@@ -63,14 +65,26 @@ public class RegisterActivity extends Activity {
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
                         try{
                             if(response.body().string().equals("1")){
-                                Log.v("Test", "실패");
-                                Toast.makeText(RegisterActivity.this,"중복된 아이디입니다.", Toast.LENGTH_SHORT).show();
+                                dupId = 0;
+                                Log.d("Test", "실패");
+                                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("중복된 아이디입니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
                                 userId.requestFocus();
                                 return;
                             } else {
-                                Log.v("Test", "성공");
-                                Toast.makeText(RegisterActivity.this,"사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show();
-                            }
+                                dupId = 1;
+                                Log.d("Test", "성공");
+                                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("사용 가능한 아이디입니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
+                                }
                         }catch (Exception e){
                             Log.v("Test", "error");
                             e.printStackTrace();
@@ -97,16 +111,25 @@ public class RegisterActivity extends Activity {
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try{
                             if(response.body().string().equals("1")) {
-                                Log.v("Test", "실패");
-                                Log.v("email", response.body().toString());
-                                Toast.makeText(RegisterActivity.this,"중복된 이메일입니다.", Toast.LENGTH_SHORT).show();
-                                userMail.requestFocus();
                                 dupEmail=0;
+                                Log.d("Test", "실패");
+                                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("중복된 이메일입니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
+                                userMail.requestFocus();
                                 return;
                             } else {
-                                Log.v("email", response.body().toString());
-                                Toast.makeText(RegisterActivity.this, "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show();
                                 dupEmail=1;
+                                Log.d("email", response.body().toString());
+                                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                builder.setTitle("알림")
+                                        .setMessage("사용 가능한 이메일입니다.")
+                                        .setPositiveButton("확인", null)
+                                        .create()
+                                        .show();
                             }
                         }catch (Exception e){
                             Log.v("Test", "error");
@@ -164,21 +187,10 @@ public class RegisterActivity extends Activity {
         btn_register.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                // 아이디, 이메일 중복 여부
-                idcheck();
-                emailcheck();
-                Log.d("test","id"+dupId+", email"+dupEmail);
-
-                RetrofitClient retrofitClient = new RetrofitClient();
-                RegisterDTO dto = new RegisterDTO(userId.getText().toString(),userPwd.getText().toString(),userMail.getText().toString());
 
                 // 비밀번호 정규식
                 Pattern pattern = Pattern.compile("^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[`~!@$!%*#^?&\\\\(\\\\)\\\\-_=+])(?!.*[^a-zA-z0-9`~!@$!%*#^?&\\\\(\\\\)\\\\-_=+]).{8,16}$"); // 영문자/숫자/특수문자 포함 8~16자
                 Matcher matcher = pattern.matcher(userPwd.getText().toString());
-
-                //Gson 객체선언 후 객체를 gson으로 변환
-                //Gson gson = new Gson();
-                //String objJson = gson.toJson(dto);
 
                 // 유효성 검사
                 if(userId.getText().toString().length()==0){
@@ -211,58 +223,13 @@ public class RegisterActivity extends Activity {
                     }
                 }
 
-                if(dupId==0){
-                    Toast.makeText(RegisterActivity.this, "아이디 중복을 다시 확인하세요.", Toast.LENGTH_SHORT).show();
-                    userId.requestFocus();
-                    return;
-                }
-                if(dupEmail==0){
-                    Toast.makeText(RegisterActivity.this, "이메일 중복을 다시 확인하세요.", Toast.LENGTH_SHORT).show();
-                    userMail.requestFocus();
-                    return;
-                }
+                check();
 
-
-
-                // json으로 던져주기
-                Call<ResponseBody> signup = retrofitClient.register.goPost(dto);
-                Log.d("Test", dto.toString());
-
-                signup.enqueue(new Callback<ResponseBody>(){
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
-                        try{
-                            if(!response.isSuccessful()){
-                                Log.v("result", "실패");
-                            } else {
-                                Log.v("Test", "회원가입성공");
-
-                                // variable check
-                                Log.d("Test", response.body().toString());
-                                Log.d("Test", call.toString());
-                                Log.d("Test", response.toString());
-
-                                Toast.makeText(RegisterActivity.this,"회원가입완료", Toast.LENGTH_SHORT).show();
-                                Intent intent = null;
-                                intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                                startActivity(intent);
-                            }
-                        }catch (Exception e){
-                            Log.v("Test", "error");
-                            e.printStackTrace();
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t){
-                        Log.v("Test", "접속실패");
-
-                    }
-                });
             };
         });
     }
 
-    public void idcheck(){
+    public void check(){
         RetrofitClient retrofitClient = new RetrofitClient();
         IdDTO dto = new IdDTO(userId.getText().toString());
 
@@ -272,14 +239,82 @@ public class RegisterActivity extends Activity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
                 try{
                     if(response.body().string().equals("1")){
-                        Log.v("Test", response.body().string());
-                        //Toast.makeText(RegisterActivity.this,"중복된 아이디입니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("Test", "실패");
+                        Toast.makeText(RegisterActivity.this,"중복된 아이디입니다.", Toast.LENGTH_SHORT).show();
                         userId.requestFocus();
                         dupId=0;
-                        return;
                     } else {
                         dupId=1;
+                        Log.d("Test", "성공");
+
+                        RetrofitClient retrofitClient = new RetrofitClient();
+                        EmailDTO dto = new EmailDTO(userMail.getText().toString());
+
+                        Call<ResponseBody> check = retrofitClient.register.emailCheck(dto);
+                        check.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                try{
+                                    if(response.body().string().equals("1")) {
+                                        Log.d("Test", "실패");
+                                        Toast.makeText(RegisterActivity.this,"중복된 이메일입니다.", Toast.LENGTH_SHORT).show();
+                                        userMail.requestFocus();
+                                        dupEmail=0;
+                                    } else {
+                                        dupEmail=1;
+                                        Log.d("Test", "성공");
+
+                                        RetrofitClient retrofitClient = new RetrofitClient();
+                                        RegisterDTO dto = new RegisterDTO(userId.getText().toString(),userPwd.getText().toString(),userMail.getText().toString());
+
+                                        Call<ResponseBody> signup = retrofitClient.register.goPost(dto);
+                                        Log.d("Test", dto.toString());
+
+                                        signup.enqueue(new Callback<ResponseBody>() {
+                                            @Override
+                                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                try {
+                                                    if (!response.isSuccessful()) {
+                                                        Log.v("result", "실패");
+                                                    } else {
+                                                        Log.v("Test", "회원가입성공");
+
+                                                        // variable check
+                                                        Log.d("Test", response.body().toString());
+                                                        Log.d("Test", call.toString());
+                                                        Log.d("Test", response.toString());
+
+                                                        Toast.makeText(RegisterActivity.this, "회원가입완료", Toast.LENGTH_SHORT).show();
+                                                        Intent intent = null;
+                                                        intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                                        startActivity(intent);
+                                                    }
+                                                } catch (Exception e) {
+                                                    Log.v("Test", "error");
+                                                    e.printStackTrace();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                Log.v("Test", "접속실패");
+
+                                            }
+                                        });
+                                    }
+                                    return;
+                                }catch (Exception e){
+                                    Log.v("Test", "error");
+                                    e.printStackTrace();
+                                }
+                            }
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.d("test", t.toString());
+                            }
+                        });
                     }
+                    return;
                 }catch (Exception e){
                     Log.v("Test", "error");
                     e.printStackTrace();
@@ -292,34 +327,4 @@ public class RegisterActivity extends Activity {
         });
     }
 
-    public void emailcheck(){
-        RetrofitClient retrofitClient = new RetrofitClient();
-        EmailDTO dto = new EmailDTO(userMail.getText().toString());
-
-        Call<ResponseBody> check = retrofitClient.register.emailCheck(dto);
-        check.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try{
-                    if(response.body().string().equals("1")) {
-                        Log.v("Test", "실패");
-                        Log.v("email", response.body().toString());
-                        //Toast.makeText(RegisterActivity.this,"중복된 이메일입니다.", Toast.LENGTH_SHORT).show();
-                        userMail.requestFocus();
-                        dupEmail=0;
-                        return;
-                    } else {
-                        dupEmail=1;
-                    }
-                }catch (Exception e){
-                    Log.v("Test", "error");
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("test", t.toString());
-            }
-        });
-    }
 }
